@@ -1,49 +1,36 @@
 var express = require('express'),
-    https = require('https');
+    https = require('https'),
+    google = require('../services/google.js');
 
 module.exports = function(app) {
     var router =  express.Router();
-    app.use('/api', router);
+    app.use('/api/devices', router);
 
-    router.route('/devices/:deviceId')
+    router.route('/commands')
         .post(function(req, res) {
-            console.log(req.body.url);
+            var token = req.get('Authorization');
+            if(!token) {
+                res.status(401).send('Authorization header must be sent with Google token');
+                return;
+            }
 
-            // Send GCM message to the device
-            // TODO Do not hardcode registration token. Store in secure storage
-            var postData = JSON.stringify({
-                "data": {
-                    "type": "url",
-                    "data": req.body.url,
-                },
-                "to" : "eP9SKcIBJew:APA91bF4FE6Gwr8khtKEyHt_SrtgOiIl-gpzN_gMHPvA3Y2xEDTKfXvgrGn02TJKptw09TLKn3UfhEWojM3VouypndZtE5QXr0qW-c4wnCEPccUPrWR40ByDdEqU18PhKv6kvzXjZE6g"
-            });
+            google.isValidToken(token, function(isValid) {
+                if(!isValid) {
+                    res.status(401).send('Google token was invalid')
+                    return;
+                }
 
-            // TODO Do not hardcode API key
-            var options = {
-                method: 'POST',
-                host: 'gcm-http.googleapis.com',
-                path: '/gcm/send',
-                headers: {
-                    Authorization: 'key=AIzaSyC5NfTAr56W2v7hRpsRhO11PqcHODVcwOU',
-                    'Content-Type': 'application/json', 
-                    'Content-Length': postData.length
-                }
-            };
-            
-            var googleReq = https.request(options, function(resp) {
-                var resultStatusCode;
-                if(resp.statusCode === 200) {
-                    console.log('GCM message sent!');
-                    resultStatusCode = 200;
-                } else {
-                    console.log('GCM message failed!');
-                    resultStatusCode = 500;
-                }
-                res.writeHead(resultStatusCode);
-                res.end();
+                // TODO Do not hardcode device registration token
+                console.log(req.body.url);
+                google.sendGcmMessage(
+                    {
+                        "type": "url",
+                        "data": req.body.url,
+                    },
+                    "cHhSZYxMG-0:APA91bFwvxYTXS8LYLPP1JKBMvjuUKcQJoMqfopxMSDd40FXQBZoZ0dYl-DA7b5Nqi-UI4Bef8q8WoPcMG3YRkE99EDxlk8R-ilkg9uOvmXw2nLL7KYU6faSxVn_-3oj8cgs2LgI5n1v",
+                    function(success) {
+                        res.status(success ? 200 : 500).end();
+                    });
             });
-            googleReq.write(postData);
-            googleReq.end();
         });
 };
