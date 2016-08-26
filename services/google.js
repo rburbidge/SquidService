@@ -1,4 +1,5 @@
-var https = require('https');
+var https = require('https'),
+    request = require('request');
 
 module.exports = {
     /**
@@ -14,6 +15,21 @@ module.exports = {
         https.request(options, function(resp) {
             callback(resp.statusCode === 200);
         }).end();
+    },
+
+    getUserProfile: function(token, callback, errorCallback) {
+        // Use request rather than https module here because it provides free response body parsing
+        request({
+                url: 'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' + token,
+                json: true
+            },
+            function(error, response, body) {
+                if(error) {
+                    errorCallback(error);
+                } else {
+                    callback(body);
+                }
+            });
     },
 
     /**
