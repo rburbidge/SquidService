@@ -16,7 +16,8 @@ module.exports = {
             function(user) {
                 if(!user) {
                     console.error('AuthZ failed. Unable to obtain identity. user is falsy');
-                    res.status(401).send('Could not retrieve user profile');
+                    res.status(401).send('Authorization did not return a user');
+                    return;
                 }
 
                 console.log('User is authZd');
@@ -25,7 +26,7 @@ module.exports = {
             },
             function(error) {
                 console.error('AuthZ failed. google.getUserProfile() returned error=' + error);
-                res.status(500).end();
+                res.status(401).send('Authorization header was invalid').end();
             });
     }
 };
