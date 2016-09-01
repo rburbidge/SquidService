@@ -26,6 +26,8 @@ module.exports = {
             function(error, response, body) {
                 if(error) {
                     errorCallback(error);
+                } else if(response.statusCode != 200) {
+                    errorCallback('response.statusCode=' + response.statusCode + ', body=' + body);
                 } else {
                     callback(body);
                 }
@@ -38,8 +40,8 @@ module.exports = {
     sendGcmMessage: function(data, gcmToken, callback) {
         var postData = JSON.stringify(
             {
-                "data": data,
-                "to" : gcmToken
+                data: data,
+                to: gcmToken
             });
 
         // TODO Do not hardcode API key
@@ -55,7 +57,7 @@ module.exports = {
         };
         var googleReq = https.request(options, function(resp) {
             if(resp.statusCode === 200) {
-                console.log('GCM message sent!');
+                console.log('GCM message sent: ' + data);
             } else {
                 console.log('GCM message failed: statusCode=' + resp.statusCode);
             }
