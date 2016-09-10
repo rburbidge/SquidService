@@ -91,10 +91,7 @@ module.exports = function(app) {
             res.status(200).send();
         });
 
-    var commands =  express.Router();
-    app.use('/api/devices/:deviceId/commands', commands);
-
-    commands.route('/')
+    devices.route('/:deviceId/commands')
         .post(function(req, res) {
             var deviceId = req.params.deviceId;
             if(!deviceId) {
@@ -110,20 +107,18 @@ module.exports = function(app) {
                 return;
             }
 
-            var device = user.devices[deviceId];
-            if(!device) {
+            var gcmToken = user.devices[deviceId];
+            if(!gcmToken) {
                 console.log('Device does not exist');
                 res.status(404).send();
             }
-
-            // TODO Do not hardcode device registration token
-            console.log(req.body.url);
+            
             google.sendGcmMessage(
                 {
                     "type": "url",
                     "data": req.body.url,
                 },
-                device.gcmToken,
+                gcmToken,
                 function(success) {
                     res.status(success ? 200 : 500).end();
                 });

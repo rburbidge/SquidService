@@ -1,6 +1,7 @@
 var assert = require('assert'),
     request = require('supertest'),
-    config = require('./config.js');
+    config = require('./config.js'),
+    uuid = require('uuid');
 
 describe('devices', function() {
     it('GET devices should return 404', function(done) {
@@ -11,11 +12,11 @@ describe('devices', function() {
             .expect('User not found', done);
     });
 
-    it('POST devices should return post new device', function(done) {
+    it('POST devices should return new device', function(done) {
         request(config.target)
             .post('/api/devices')
             .set('Authorization', config.authorization)
-            .send({ gcmToken: this.test.title })
+            .send({ gcmToken: uuid.v4() })
             .expect(200)
             .end(function(err, res) {
 
@@ -49,4 +50,29 @@ describe('devices', function() {
                     .end(done);
             });
     });
+
+    it('POST devices/<deviceId>/commands should return 200', function(done) {
+        var gcmToken = uuid.v4();
+        addDevice(gcmToken, function(deviceId) {
+            request(config.target)
+            .post('/api/devices/' + deviceId + '/commands')
+            .set('Authorization', config.authorization)
+            .send({ url: 'http://www.google.com' })
+            .expect(200, done);
+        });
+    });
+
+    function addDevice(gcmToken, done) {
+        request(config.target)
+            .post('/api/devices')
+            .set('Authorization', config.authorization)
+            .send({ gcmToken: gcmToken })
+            .expect(200)
+            .end(function(err, res) {
+                var data = JSON.parse(res.text);
+                assert.ok(data.deviceId, 'No device ID was returned');
+
+                done(data.deviceId);
+            }); 
+    }
 });

@@ -5,5 +5,5 @@ module.exports = {
 
     // Must be a Google OAuth token
     // TODO Determine an automated way of requesting this
-    authorization: 'ya29.CjRaAz42ek50p6GPCl-dVZDU3slrGcOT0fuTl3oUAr1JUOhVROrPCjbSiutWVHLyQM7zmwga'
+    authorization: 'ya29.CjRaAyCYH-rMSKjizx9rygPS7wZICbVsvgJ-b9QtRplx_MtW8EcwtQpnwkA5NW8bsmzWraZj'
 }
