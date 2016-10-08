@@ -1,8 +1,9 @@
 var express = require('express'),
     https = require('https'),
     uuid = require('uuid'),
+    devicesConverter = require('../models/devices-converter.js'),
     google = require('../services/google.js'),
-    googleAuth = require('../auth/google-auth.js'),
+    googleAuth = require('../auth/google-auth.js')(),
     User = require('../models/user.js');
 
 
@@ -13,20 +14,28 @@ module.exports = function(app) {
     var devices =  express.Router();
     app.use('/api/devices', devices);
 
-    devices.use(googleAuth.googleAuthZ);
+    devices.use(googleAuth);
 
     devices.route('')
         .get(function(req, res) {
             if(users[req.user.id]) {
-                res.status(200).send(users[req.user.id].devices);
+                res.status(200).send(devicesConverter(users[req.user.id].devices));
             } else {
                 res.status(404).send('User not found');
             }
         })
         .post(function(req, res) {
+            console.log(req.body);
+
+            var name = req.body.name;
+            if(!name) {
+                res.status(400).send('Must pass name');
+                return;
+            }
+
             var gcmToken = req.body.gcmToken;
             if(!gcmToken) {
-                res.status(404).send('Must pass gcmToken');
+                res.status(400).send('Must pass gcmToken');
                 return;
             }
 
@@ -42,7 +51,7 @@ module.exports = function(app) {
             } else {
                 for(var currentDeviceId in user.devices) {
                     if(user.devices.hasOwnProperty(currentDeviceId)) {
-                        if(user.devices[currentDeviceId] === gcmToken) {
+                        if(user.devices[currentDeviceId].gcmToken === gcmToken) {
                             console.log('User ' + req.user.id + ' already has deviceId=' + currentDeviceId + ' with the same gcmToken');
                             deviceId = currentDeviceId;
                             break;
@@ -57,7 +66,10 @@ module.exports = function(app) {
                 // Add the device
                 deviceId = uuid.v4();
                 console.log('Adding new device with ID=' + deviceId);
-                user.devices[deviceId] = gcmToken;
+                user.devices[deviceId] = {
+                    gcmToken: gcmToken,
+                    name: name
+                };
                 console.log('Added new deviceId=' + deviceId);
 
                 status = 200;
@@ -95,22 +107,21 @@ module.exports = function(app) {
         .post(function(req, res) {
             var deviceId = req.params.deviceId;
             if(!deviceId) {
-                res.status(404).send('Must pass deviceId');
+                res.status(400).send('Must pass deviceId');
                 return;
             }
 
             // If the user does not exist, then return
             var user = users[req.user.id];
             if(!user) {
-                console.log('User does not exist');
-                res.status(404).send();
+                res.status(404).send('User does not exist');
                 return;
             }
 
-            var gcmToken = user.devices[deviceId];
+            var gcmToken = user.devices[deviceId].gcmToken;
+            console.log('GCM token retrieved. gcmToken=' + gcmToken);
             if(!gcmToken) {
-                console.log('Device does not exist');
-                res.status(404).send();
+                res.status(404).send('Device does not exist');
             }
             
             google.sendGcmMessage(

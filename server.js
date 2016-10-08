@@ -2,7 +2,6 @@ var bodyParser = require('body-parser'),
     express = require('express');
 
 var app = express();
-app.use(bodyParser.json());
 
 // Logging middleware
 app.use('/*', function(req, res, next) {
@@ -10,7 +9,8 @@ app.use('/*', function(req, res, next) {
     console.log('Begin ' + operation);
     
     function after() {
-        console.log('End ' + operation + '\n');
+        console.log('End ' + operation + ' ' + res.statusCode);
+        console.log('\n');
     }
     res.on('finish', after);
     res.on('close', after);
@@ -21,6 +21,8 @@ app.get('/', function(req, res) {
     res.writeHead(200);
     res.end('Sir Nommington');
 });
+
+app.use(bodyParser.json());
 
 require('./routes/device.js')(app);
 

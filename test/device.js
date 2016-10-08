@@ -26,6 +26,19 @@ describe('devices', function() {
             });
     });
 
+    it('POST devices should return 400 if gcmToken not passed', function(done) {
+        var deviceId1;
+        var deviceId2;
+        var gcmToken = this.test.title;
+
+        request(config.target)
+            .post('/api/devices')
+            .set('Authorization', config.authorization)
+            .expect(400)
+            .expect('Must pass gcmToken', done);
+    });
+
+
     it('POST devices should return original deviceId the second time', function(done) {
         var deviceId1;
         var deviceId2;

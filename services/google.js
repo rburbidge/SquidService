@@ -5,22 +5,29 @@ module.exports = {
     /**
      * Checks if a google token is valid. Callback is invoked with true if the token is valid; false otherwise.
      */
-   isValidToken: function(token, callback) {
-        var options = {
-            method: 'GET',
-            host: 'www.googleapis.com',
-            path: '/oauth2/v3/tokeninfo?access_token=' + token,
-        };
-            
-        https.request(options, function(resp) {
-            callback(resp.statusCode === 200);
-        }).end();
-    },
-
-    getUserProfile: function(token, callback, errorCallback) {
+    getTokenInfo: function(tokenType, token, callback, errorCallback) {
         // Use request rather than https module here because it provides free response body parsing
         request({
-                url: 'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' + token,
+                url: `https://www.googleapis.com/oauth2/v3/tokeninfo?${tokenType}=${token}`,
+                json: true
+            },
+            function(error, response, body) {
+                // TODO Verify that the aud field matches one of my known client IDs
+
+                if(error) {
+                    errorCallback(error);
+                } else if(response.statusCode != 200) {
+                    errorCallback('response.statusCode=' + response.statusCode + ', body=' + body);
+                } else {
+                    callback(body);
+                }
+            });
+    },
+
+    getUserInfo: function(accessToken, callback, errorCallback) {
+        // Use request rather than https module here because it provides free response body parsing
+        request({
+                url: `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`,
                 json: true
             },
             function(error, response, body) {
