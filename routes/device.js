@@ -1,58 +1,57 @@
-var express = require('express'),
-    https = require('https'),
-    uuid = require('uuid'),
-    devicesConverter = require('../models/devices-converter.js'),
-    google = require('../services/google.js'),
-    googleAuth = require('../auth/google-auth.js')(),
-    User = require('../models/user.js');
-
-
-var users = {
-};
-
 module.exports = function(app) {
+    var express = require('express'),
+        https = require('https'),
+        uuid = require('uuid'),
+        devicesConverter = require('../models/devices-converter.js'),
+        Error = require('../models/error.js'),
+        google = require('../services/google.js'),
+        googleAuth = require('../auth/google-auth.js')(),
+        User = require('../models/user.js');
+
+    var users = {};
+
     var devices =  express.Router();
     app.use('/api/devices', devices);
-
     devices.use(googleAuth);
+
+    var assertNoErrors = function(req, res) {
+        var errors = req.validationErrors();
+        if (errors) {
+            res.status(400).send('Errors: ' + JSON.stringify(errors));
+            return false;
+        }
+
+        return true;
+    };
 
     devices.route('')
         .get(function(req, res) {
-            if(users[req.user.id]) {
-                res.status(200).send(devicesConverter(users[req.user.id].devices));
+            if(users[req.user]) {
+                res.status(200).send(devicesConverter(users[req.user].devices));
             } else {
-                res.status(404).send('User not found');
+                res.status(404).send(new Error('UserNotFound', 'The user does not exist'));
             }
         })
         .post(function(req, res) {
-            console.log(req.body);
-
-            var name = req.body.name;
-            if(!name) {
-                res.status(400).send('Must pass name');
-                return;
-            }
-
-            var gcmToken = req.body.gcmToken;
-            if(!gcmToken) {
-                res.status(400).send('Must pass gcmToken');
-                return;
-            }
+            req.checkBody('name', 'Must pass name').notEmpty();
+            req.checkBody('gcmToken', 'Must pass gcmToken').notEmpty();
+            if(!assertNoErrors(req, res)) return;    
 
             // Create the user if they do not exist
             // If they do exist, then check if they own a device with the same GCM token already
+            var gcmToken = req.body.gcmToken;
             var deviceId;
-            var user = users[req.user.id];
+            var user = users[req.user];
             if(!user) {
                 console.log('Adding new user');
                 user = { devices: {} };
-                users[req.user.id] = user;
+                users[req.user] = user;
                 console.log('New user added');
             } else {
                 for(var currentDeviceId in user.devices) {
                     if(user.devices.hasOwnProperty(currentDeviceId)) {
                         if(user.devices[currentDeviceId].gcmToken === gcmToken) {
-                            console.log('User ' + req.user.id + ' already has deviceId=' + currentDeviceId + ' with the same gcmToken');
+                            console.log('User ' + req.user + ' already has deviceId=' + currentDeviceId + ' with the same gcmToken');
                             deviceId = currentDeviceId;
                             break;
                         }
@@ -68,10 +67,9 @@ module.exports = function(app) {
                 console.log('Adding new device with ID=' + deviceId);
                 user.devices[deviceId] = {
                     gcmToken: gcmToken,
-                    name: name
+                    name: req.body.name
                 };
-                console.log('Added new deviceId=' + deviceId);
-
+                console.log('Added new device');
                 status = 200;
             } else {
                 status = 304;
@@ -82,7 +80,7 @@ module.exports = function(app) {
 
     devices.route('/:deviceId')
         .delete(function(req, res) {
-            // If the user does not exist, then return
+            // If the user does not exist, then return not found
             var user = users[req.user.id];
             if(!user) {
                 console.log('User does not exist');
@@ -90,10 +88,9 @@ module.exports = function(app) {
                 return;
             }
 
-            // If the device is not registered, then return not modified
+            // If the device is not registered, then return not found
             if(! user.devices[req.params.deviceId]) {
-                console.log('Device is not registered under this user');
-                res.status(304).send();
+                res.status(404).send('Device is not registered under this user');
                 return;
             }
 
@@ -105,23 +102,28 @@ module.exports = function(app) {
 
     devices.route('/:deviceId/commands')
         .post(function(req, res) {
-            var deviceId = req.params.deviceId;
-            if(!deviceId) {
-                res.status(400).send('Must pass deviceId');
-                return;
-            }
+            req.check('deviceId', 'Must pass deviceId').notEmpty();
+            if(!assertNoErrors(req, res)) return;
 
             // If the user does not exist, then return
-            var user = users[req.user.id];
+            var user = users[req.user];
             if(!user) {
                 res.status(404).send('User does not exist');
                 return;
             }
 
-            var gcmToken = user.devices[deviceId].gcmToken;
+            var deviceId = req.params.deviceId;
+            var device = user.devices[deviceId];
+            if(!device) {
+                res.status(404).send('Device does not exist');
+                return;
+            }
+
+            var gcmToken = device.gcmToken;
             console.log('GCM token retrieved. gcmToken=' + gcmToken);
             if(!gcmToken) {
                 res.status(404).send('Device does not exist');
+                return;
             }
             
             google.sendGcmMessage(

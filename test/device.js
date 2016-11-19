@@ -19,7 +19,6 @@ describe('devices', function() {
             .send({ gcmToken: uuid.v4() })
             .expect(200)
             .end(function(err, res) {
-
                 var data = JSON.parse(res.text);
                 assert.ok(data.deviceId, 'No deviceId was returned');
                 done();
