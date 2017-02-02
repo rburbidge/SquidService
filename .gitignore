@@ -3,3 +3,5 @@ server.js.logs
 server.js.debug
 settings.json
 iisnode
+*.js
+*.js.map

@@ -1,8 +1,9 @@
+import DeviceModel  from '../models/device';
+
 module.exports = function(app) {
     var express = require('express'),
         https = require('https'),
         uuid = require('uuid'),
-        devicesConverter = require('../models/devices-converter.js'),
         Error = require('../models/error.js'),
         google = require('../services/google.js'),
         googleAuth = require('../auth/google-auth.js')(),
@@ -27,7 +28,7 @@ module.exports = function(app) {
     devices.route('')
         .get(function(req, res) {
             if(users[req.user]) {
-                res.status(200).send(devicesConverter.convertDevices(users[req.user].devices));
+                res.status(200).send(DeviceModel.convertDevices(users[req.user].devices));
             } else {
                 res.status(404).send(new Error('UserNotFound', 'The user does not exist'));
             }
@@ -71,7 +72,7 @@ module.exports = function(app) {
                 };
                 console.log('Added new device');
 
-                device = new devicesConverter.Device(deviceId, req.body.name);
+                device = new DeviceModel(deviceId, req.body.name);
                 status = 200;
             } else {
                 status = 304;
