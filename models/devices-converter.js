@@ -5,20 +5,22 @@
  *      name: string  
  * }
  */
-module.exports = function(devices) {
-    function Device(id, name) {
+module.exports = {
+    Device: function(id, name) {
         this.id = id;
         this.name = name;
-    }
+    },
 
-    var converted = [];
+    convertDevices: function(devices) {
+        var converted = [];
 
-    for(var currentDeviceId in devices) {
-        if(devices.hasOwnProperty(currentDeviceId)) {
-            var device = devices[currentDeviceId];
-            converted.push(new Device(currentDeviceId, device.name));
+        for(var currentDeviceId in devices) {
+            if(devices.hasOwnProperty(currentDeviceId)) {
+                var device = devices[currentDeviceId];
+                converted.push(new this.Device(currentDeviceId, device.name));
+            }
         }
-    }
 
-    return converted;
+        return converted;
+    }
 };

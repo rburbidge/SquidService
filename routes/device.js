@@ -27,7 +27,7 @@ module.exports = function(app) {
     devices.route('')
         .get(function(req, res) {
             if(users[req.user]) {
-                res.status(200).send(devicesConverter(users[req.user].devices));
+                res.status(200).send(devicesConverter.convertDevices(users[req.user].devices));
             } else {
                 res.status(404).send(new Error('UserNotFound', 'The user does not exist'));
             }
@@ -40,7 +40,7 @@ module.exports = function(app) {
             // Create the user if they do not exist
             // If they do exist, then check if they own a device with the same GCM token already
             var gcmToken = req.body.gcmToken;
-            var deviceId;
+            var device;
             var user = users[req.user];
             if(!user) {
                 console.log('Adding new user');
@@ -52,7 +52,7 @@ module.exports = function(app) {
                     if(user.devices.hasOwnProperty(currentDeviceId)) {
                         if(user.devices[currentDeviceId].gcmToken === gcmToken) {
                             console.log('User ' + req.user + ' already has deviceId=' + currentDeviceId + ' with the same gcmToken');
-                            deviceId = currentDeviceId;
+                            device = user.devices[currentDeviceId];
                             break;
                         }
                     }
@@ -61,27 +61,29 @@ module.exports = function(app) {
 
             // Add the device if it doesn't exist, and determine the response status
             var status;
-            if(!deviceId) {
+            if(!device) {
                 // Add the device
-                deviceId = uuid.v4();
+                var deviceId = uuid.v4();
                 console.log('Adding new device with ID=' + deviceId);
                 user.devices[deviceId] = {
                     gcmToken: gcmToken,
                     name: req.body.name
                 };
                 console.log('Added new device');
+
+                device = new devicesConverter.Device(deviceId, req.body.name);
                 status = 200;
             } else {
                 status = 304;
             }
             
-            res.status(status).send({ deviceId: deviceId });
+            res.status(status).send(device);
         });
 
     devices.route('/:deviceId')
         .delete(function(req, res) {
             // If the user does not exist, then return not found
-            var user = users[req.user.id];
+            var user = users[req.user];
             if(!user) {
                 console.log('User does not exist');
                 res.status(404).send();
