@@ -1,20 +1,25 @@
-import DeviceModel  from '../models/device';
+import Device from '../data/models/device';
+import DeviceModel from '../models/device';
+import ErrorModel from '../models/error-model';
+import User from '../data/models/user';
+import Users from '../data/users';
 
-module.exports = function(app) {
+/**
+ * Creates the devices router.
+ * TODO Strongly type the devices router.
+ */
+export default function() {
     var express = require('express'),
         https = require('https'),
-        uuid = require('uuid'),
-        Error = require('../models/error.js'),
         google = require('../services/google.js'),
-        googleAuth = require('../auth/google-auth.js')(),
-        User = require('../models/user.js');
+        googleAuth = require('../auth/google-auth.js')();
 
-    var users = {};
+    let users: Users = new Users();
 
     var devices =  express.Router();
-    app.use('/api/devices', devices);
     devices.use(googleAuth);
 
+    // TODO Move this into a reusable part of the pipeline
     var assertNoErrors = function(req, res) {
         var errors = req.validationErrors();
         if (errors) {
@@ -27,10 +32,11 @@ module.exports = function(app) {
 
     devices.route('')
         .get(function(req, res) {
-            if(users[req.user]) {
-                res.status(200).send(DeviceModel.convertDevices(users[req.user].devices));
+            let user: User = users.getUser(req.user);
+            if(user) {
+                res.status(200).send(DeviceModel.convertDevices(user.getDevices()));
             } else {
-                res.status(404).send(new Error('UserNotFound', 'The user does not exist'));
+                res.status(404).send(new ErrorModel('UserNotFound', 'The user does not exist'));
             }
         })
         .post(function(req, res) {
@@ -40,51 +46,33 @@ module.exports = function(app) {
 
             // Create the user if they do not exist
             // If they do exist, then check if they own a device with the same GCM token already
-            var gcmToken = req.body.gcmToken;
-            var device;
-            var user = users[req.user];
+            let gcmToken: string = req.body.gcmToken;
+            let user: User = users.getUser[req.user];
+            let device: Device;
             if(!user) {
-                console.log('Adding new user');
-                user = { devices: {} };
-                users[req.user] = user;
-                console.log('New user added');
+                user = users.addUser(req.user);
             } else {
-                for(var currentDeviceId in user.devices) {
-                    if(user.devices.hasOwnProperty(currentDeviceId)) {
-                        if(user.devices[currentDeviceId].gcmToken === gcmToken) {
-                            console.log('User ' + req.user + ' already has deviceId=' + currentDeviceId + ' with the same gcmToken');
-                            device = user.devices[currentDeviceId];
-                            break;
-                        }
-                    }
-                }
+                device = user.getDeviceByGcmToken(gcmToken);
+                if (device) console.log('User already has device ID=' + device.id + ' with the same gcmToken');
             }
 
             // Add the device if it doesn't exist, and determine the response status
-            var status;
+            let status: number;
             if(!device) {
-                // Add the device
-                var deviceId = uuid.v4();
-                console.log('Adding new device with ID=' + deviceId);
-                user.devices[deviceId] = {
-                    gcmToken: gcmToken,
-                    name: req.body.name
-                };
-                console.log('Added new device');
-
-                device = new DeviceModel(deviceId, req.body.name);
+                device = user.addDevice(req.body.name, gcmToken);
                 status = 200;
             } else {
                 status = 304;
             }
-            
-            res.status(status).send(device);
+
+            let deviceModel = new DeviceModel(device);
+            res.status(status).send(deviceModel);
         });
 
     devices.route('/:deviceId')
         .delete(function(req, res) {
             // If the user does not exist, then return not found
-            var user = users[req.user];
+            let user: User = users.getUser(req.user);
             if(!user) {
                 console.log('User does not exist');
                 res.status(404).send();
@@ -92,13 +80,12 @@ module.exports = function(app) {
             }
 
             // If the device is not registered, then return not found
-            if(! user.devices[req.params.deviceId]) {
+            let deletedDevice: Device = user.removeDevice(req.params.deviceId);
+            if(! deletedDevice) {
                 res.status(404).send('Device is not registered under this user');
                 return;
             }
 
-            // Remove the device
-            delete user.devices[req.params.deviceId];
             console.log('Removed device');
             res.status(200).send();
         });
@@ -109,34 +96,29 @@ module.exports = function(app) {
             if(!assertNoErrors(req, res)) return;
 
             // If the user does not exist, then return
-            var user = users[req.user];
+            let user: User = users.getUser(req.user);
             if(!user) {
                 res.status(404).send('User does not exist');
                 return;
             }
 
-            var deviceId = req.params.deviceId;
-            var device = user.devices[deviceId];
+            let deviceId: string = req.params.deviceId;
+            let device: Device = user.getDeviceById(deviceId);
             if(!device) {
                 res.status(404).send('Device does not exist');
                 return;
             }
-
-            var gcmToken = device.gcmToken;
-            console.log('GCM token retrieved. gcmToken=' + gcmToken);
-            if(!gcmToken) {
-                res.status(404).send('Device does not exist');
-                return;
-            }
-            
+        
+            // TODO Make contract interface for this
             google.sendGcmMessage(
                 {
                     "type": "url",
                     "data": req.body.url,
                 },
-                gcmToken,
+                device.gcmToken,
                 function(success) {
                     res.status(success ? 200 : 500).end();
                 });
         });
+    return devices;
 };

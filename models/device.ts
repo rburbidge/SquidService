@@ -1,22 +1,15 @@
+import Device from '../data/models/device';
+
 export default class DeviceModel {
     id: string;
     name: string;
 
-    constructor(id: string, name: string) {
-        this.id = id;
-        this.name = name;
+    constructor(device: Device) {
+        this.id = device.id;
+        this.name = device.name;
     }
 
-    public static convertDevices(devices: any): DeviceModel[] {
-        let converted: DeviceModel[] = [];
-
-        for (let currentDeviceId in devices) {
-            if (devices.hasOwnProperty(currentDeviceId)) {
-                var device = devices[currentDeviceId];
-                converted.push(new DeviceModel(currentDeviceId, device.name));
-            }
-        }
-
-        return converted;
+    public static convertDevices(devices: Device[]): DeviceModel[] {
+        return devices.map((value: Device) => new DeviceModel(value));
     }
 }

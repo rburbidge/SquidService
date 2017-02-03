@@ -5,3 +5,4 @@ settings.json
 iisnode
 *.js
 *.js.map
+!gulpfile.js
