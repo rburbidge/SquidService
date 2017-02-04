@@ -1,30 +1,31 @@
 var https = require('https'),
     request = require('request');
-
-module.exports = {
+export default class Google {
     /**
      * Checks if a google token is valid. Callback is invoked with true if the token is valid; false otherwise.
      */
-    getTokenInfo: function(tokenType, token, callback, errorCallback) {
-        // Use request rather than https module here because it provides free response body parsing
-        request({
-                url: `https://www.googleapis.com/oauth2/v3/tokeninfo?${tokenType}=${token}`,
-                json: true
-            },
-            function(error, response, body) {
-                // TODO Verify that the aud field matches one of my known client IDs
+    public static getTokenInfo(tokenType: string, token: string): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            // Use request rather than https module here because it provides free response body parsing
+            request({
+                    url: `https://www.googleapis.com/oauth2/v3/tokeninfo?${tokenType}=${token}`,
+                    json: true
+                },
+                function(error, response, body) {
+                    // TODO Verify that the aud field matches one of my known client IDs
 
-                if(error) {
-                    errorCallback(error);
-                } else if(response.statusCode != 200) {
-                    errorCallback('response.statusCode=' + response.statusCode + ', body=' + body);
-                } else {
-                    callback(body);
-                }
-            });
-    },
+                    if(error) {
+                        reject(error);
+                    } else if(response.statusCode != 200) {
+                        reject('response.statusCode=' + response.statusCode + ', body=' + body);
+                    } else {
+                        resolve(body);
+                    }
+                });
+        });
+    }
 
-    getUserInfo: function(accessToken, callback, errorCallback) {
+    public static getUserInfo(accessToken, callback, errorCallback) {
         // Use request rather than https module here because it provides free response body parsing
         request({
                 url: `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`,
@@ -39,12 +40,12 @@ module.exports = {
                     callback(body);
                 }
             });
-    },
+    }
 
     /**
      * Sends the payload data to a device with GCM registration token. Callback is invoked with true upon success; false otherwise.
      */
-    sendGcmMessage: function(data, gcmToken, callback) {
+    public static sendGcmMessage(data, gcmToken, callback) {
         var postData = JSON.stringify(
             {
                 data: data,
@@ -74,4 +75,4 @@ module.exports = {
         googleReq.write(postData);
         googleReq.end();
     }
-};
+}

@@ -1,6 +1,8 @@
 import Device from '../data/models/device';
 import DeviceModel from '../models/device';
 import ErrorModel from '../models/error-model';
+import Google from '../services/google';
+import GoogleAuth from '../auth/google-auth';
 import User from '../data/models/user';
 import Users from '../data/users';
 
@@ -10,14 +12,12 @@ import Users from '../data/users';
  */
 export default function() {
     var express = require('express'),
-        https = require('https'),
-        google = require('../services/google.js'),
-        googleAuth = require('../auth/google-auth.js')();
+        https = require('https');
 
     let users: Users = new Users();
 
     var devices =  express.Router();
-    devices.use(googleAuth);
+    devices.use(GoogleAuth.auth);
 
     // TODO Move this into a reusable part of the pipeline
     var assertNoErrors = function(req, res) {
@@ -110,7 +110,7 @@ export default function() {
             }
         
             // TODO Make contract interface for this
-            google.sendGcmMessage(
+            Google.sendGcmMessage(
                 {
                     "type": "url",
                     "data": req.body.url,
