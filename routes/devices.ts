@@ -5,15 +5,14 @@ import Google from '../services/google';
 import GoogleAuth from '../auth/google-auth';
 import User from '../data/models/user';
 import Users from '../data/users';
+import * as https from 'https';
+import * as express from 'express';
 
 /**
  * Creates the devices router.
  * TODO Strongly type the devices router.
  */
 export default function() {
-    var express = require('express'),
-        https = require('https');
-
     let users: Users = new Users();
 
     var devices =  express.Router();
@@ -32,7 +31,7 @@ export default function() {
 
     devices.route('')
         .get(function(req, res) {
-            let user: User = users.getUser(req.user);
+            let user: User = users.getUser((req as any).user);
             if(user) {
                 res.status(200).send(DeviceModel.convertDevices(user.getDevices()));
             } else {
@@ -40,21 +39,21 @@ export default function() {
             }
         })
         .post(function(req, res) {
-            req.checkBody('name', 'Must pass name').notEmpty();
-            req.checkBody('gcmToken', 'Must pass gcmToken').notEmpty();
+            (req as any).checkBody('name', 'Must pass name').notEmpty();
+            (req as any).checkBody('gcmToken', 'Must pass gcmToken').notEmpty();
             if(!assertNoErrors(req, res)) return;    
 
             // Create the user if they do not exist
             // If they do exist, then check if they own a device with the same GCM token already
             let gcmToken: string = req.body.gcmToken;
-            let user: User = users.getUser(req.user);
+            let user: User = users.getUser((req as any).user);
             let device: Device;
             if(user) {
                 console.log('Checking for device with same GCM token');
                 device = user.getDeviceByGcmToken(gcmToken);
                 if (device) console.log('User already has device ID=' + device.id + ' with the same gcmToken');
             } else {
-                user = users.addUser(req.user);
+                user = users.addUser((req as any).user);
             }
 
             // Add the device if it doesn't exist, and determine the response status
@@ -73,7 +72,7 @@ export default function() {
     devices.route('/:deviceId')
         .delete(function(req, res) {
             // If the user does not exist, then return not found
-            let user: User = users.getUser(req.user);
+            let user: User = users.getUser((req as any).user);
             if(!user) {
                 console.log('User does not exist');
                 res.status(404).send();
@@ -97,7 +96,7 @@ export default function() {
             if(!assertNoErrors(req, res)) return;
 
             // If the user does not exist, then return
-            let user: User = users.getUser(req.user);
+            let user: User = users.getUser((req as any).user);
             if(!user) {
                 res.status(404).send('User does not exist');
                 return;

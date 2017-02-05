@@ -53,6 +53,7 @@ export default class Google {
 
     /**
      * Sends the payload data to a device with GCM registration token. Callback is invoked with true upon success; false otherwise.
+     * TODO Strongly-type the return type
      */
     public static sendGcmMessage(data, gcmToken): Promise<any> {
         return new Promise<any>((resolve, reject) => {
