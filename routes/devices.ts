@@ -47,13 +47,14 @@ export default function() {
             // Create the user if they do not exist
             // If they do exist, then check if they own a device with the same GCM token already
             let gcmToken: string = req.body.gcmToken;
-            let user: User = users.getUser[req.user];
+            let user: User = users.getUser(req.user);
             let device: Device;
-            if(!user) {
-                user = users.addUser(req.user);
-            } else {
+            if(user) {
+                console.log('Checking for device with same GCM token');
                 device = user.getDeviceByGcmToken(gcmToken);
                 if (device) console.log('User already has device ID=' + device.id + ' with the same gcmToken');
+            } else {
+                user = users.addUser(req.user);
             }
 
             // Add the device if it doesn't exist, and determine the response status
