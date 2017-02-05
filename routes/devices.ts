@@ -116,10 +116,13 @@ export default function() {
                     "type": "url",
                     "data": req.body.url,
                 },
-                device.gcmToken,
-                function(success) {
-                    res.status(success ? 200 : 500).end();
-                });
+                device.gcmToken)
+                .then(() => {
+                    res.status(200).end();
+                })
+                .catch(() => {
+                    res.status(500).end();
+                })
         });
     return devices;
 };

@@ -44,14 +44,14 @@ export default class GoogleAuth {
 
                 // For access_token, must call getUserInfo() to retrieve the ID
                 console.log('Getting user ID for access_token');
-                Google.getUserInfo(parsedAuth.token,
-                    function(user) {
+                Google.getUserInfo(parsedAuth.token)
+                    .then((user) => {
                         (req as any).user = user.sub;
                         console.log('Google ID retrieved');
                         console.log('User is authZd');
                         next();
-                    },
-                    function(error) {
+                    })
+                    .catch((error) => {
                         console.error('AuthZ failed. google.getTokenInfo() returned error=' + error);
                         res.status(401).send('Authorization header was invalid').end();
                     });
