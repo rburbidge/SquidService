@@ -2,7 +2,7 @@ import Device from '../data/models/device';
 import DeviceModel from '../models/device';
 import ErrorModel from '../models/error-model';
 import Google from '../services/google';
-import GoogleAuth from '../auth/google-auth';
+import googleAuth from '../auth/google-auth';
 import User from '../data/models/user';
 import Users from '../data/users';
 import * as https from 'https';
@@ -16,7 +16,7 @@ export default function() {
     let users: Users = new Users();
 
     var devices =  express.Router();
-    devices.use(GoogleAuth.auth);
+    devices.use(googleAuth);
 
     // TODO Move this into a reusable part of the pipeline
     var assertNoErrors = function(req, res) {

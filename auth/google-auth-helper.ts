@@ -1,4 +1,4 @@
-import ParsedAuthHeader from './parsed-auth-header';
+import AuthToken from './auth-token';
 
 /**
  * Helper for parsing Google tokens from Authorization header.
@@ -19,10 +19,10 @@ export default class GoogleAuthHelper {
     }
 
     /**
-     * Returns parses an auth header.
-     * @return The parsed header, or undefined if it could not be parsed.
+     * Returns parses an auth token from an Authorization header.
+     * @return The parsed token, or undefined if it could not be parsed.
      */
-    public static parseAuthHeader(header: string): ParsedAuthHeader {
+    public static parseAuthToken(header: string): AuthToken {
         let key: string;
         for(key in GoogleAuthHelper.tokenPrefixToType) {
             if(GoogleAuthHelper.tokenPrefixToType.hasOwnProperty(key)) {

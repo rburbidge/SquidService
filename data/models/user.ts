@@ -5,7 +5,7 @@ import Device from './device';
  */
 export default class User {
     /**
-     * The devices by their ID.
+     * The user's devices by their ID.
      */
     private devices: { [id: string]: Device} = {};
 
