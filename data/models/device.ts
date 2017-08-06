@@ -1,10 +1,12 @@
-export default class Device {
+interface Device {
     /* The device ID, defined by the server. */
-    public id: string;
+    id: string;
 
     /* The name, defined by the client. */
-    public name: string;
+    name: string;
 
     /* The Google Cloud Messaging token, from the Android device. */
-    public gcmToken: string;
+    gcmToken: string;
 }
+
+export default Device;

@@ -1,0 +1,8 @@
+{
+    "server": {
+        "defaultPort": 3000,
+        "database": {
+            "url": null
+        }
+    }
+}

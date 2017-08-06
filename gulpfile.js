@@ -53,7 +53,7 @@ gulp.task('deployTypes', function() {
  
     return gulp
         .src('node_modules/@types/*', { base: '.', buffer: false })
-        .pipe(conn.dest('./site/wwwroot/'));
+        .pipe(conn.dest('./site/wwwroot/')); 
 });
 
 // Deploys the production.json config file to Azure
