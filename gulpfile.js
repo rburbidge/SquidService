@@ -38,18 +38,20 @@ gulp.task('run', ['default'], function(cb) {
     });
 });
 
-var ftpConfig = {
-    host:     'waws-prod-sn1-025.ftp.azurewebsites.windows.net',
-    user:     argv.user || 'SirNommington\\rburbidge1', // Note the escaped backslash
-    password: argv.pass,
-    parallel: 10,
-    log:      gutil.log
-};
+function createFtpConfig() {
+    return {
+        host:     'waws-prod-sn1-025.ftp.azurewebsites.windows.net',
+        user:     'SirNommington\\' + argv.user , // Note the escaped backslash
+        password: argv.pass,
+        parallel: 10,
+        log:      gutil.log
+    };
+}
 
 // Deploys the node_modules/@types folder to Azure. Needed because Azure will fail to npm install those packages for
 // some reason.
 gulp.task('deployTypes', function() {
-    var conn = ftp.create(ftpConfig);
+    var conn = ftp.create(createFtpConfig());
  
     return gulp
         .src('node_modules/@types/*', { base: '.', buffer: false })
@@ -58,7 +60,7 @@ gulp.task('deployTypes', function() {
 
 // Deploys the production.json config file to Azure
 gulp.task('deployProdConfig', function() {
-    var conn = ftp.create(ftpConfig);
+    var conn = ftp.create(createFtpConfig());
  
     return gulp
         .src('./config/production.json')
