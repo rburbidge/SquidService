@@ -43,7 +43,13 @@ A fresh deployment to Azure looks like:
 ```
 gulp deployTypes
 gulp deployProdConfig -pass=<FTP password from Azure>
+git push azure master
 ```
 
+If you don't have the azure remote yet, run:
+
+```git remote add azure https://sirnommington.scm.azurewebsites.net:443```
+
+Notes on deployTypes and deployProdConfig commands:
 * ```./node_modules/@types``` must be uploaded to Azure by FTP because Azure refuses to NPM sync those packages to the server.
 * ```./config/production.json``` must be deployed separately because it is intentionally not included in the repo.
