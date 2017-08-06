@@ -5,10 +5,11 @@
   "main": "server.js",
   "dependencies": {
     "body-parser": "^1.15.0",
+    "config": "^1.26.1",
     "express": "^4.13.4",
     "express-validator": "^3.0.0",
     "mocha": "^3.0.2",
-    "mongodb": "^2.2.24",
+    "mongodb": "^2.2.30",
     "request": "^2.74.0",
     "request-validator": "^0.3.3",
     "supertest": "^2.0.0",

@@ -1,4 +1,4 @@
-import Config from './config/config'
+import IConfig from './config/config';
 import Devices from './data/devices';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
@@ -6,20 +6,21 @@ import devicesRouter from './routes/devices';
 import requestLogger from './logging/request-logger';
 import * as mongodb from 'mongodb';
 var validator = require('express-validator');
+var config = require('config');
 
-let config: Config = new Config;
+let serverConfig = config.get('server') as IConfig;
+
 let mongoClient: mongodb.MongoClient = mongodb.MongoClient;
-
-mongoClient.connect(config.dbUri, (err, db) => {
+mongoClient.connect(serverConfig.database.url, (err, db) => {
     if(err) {
         console.log('Error while connecting to MongoDB: ' + err);
     } else {
         console.log('Connected to MongoDB');
-        init(db);
+        onDbConnected(db);
     }
 });
 
-function init(db: mongodb.Db) {
+function onDbConnected(db: mongodb.Db) {
     let devicesDb: mongodb.Collection = db.collection('userDevices');
     let devices: Devices = new Devices(devicesDb);
 
@@ -33,7 +34,7 @@ function init(db: mongodb.Db) {
     });
     app.use('/api/devices', devicesRouter(devices));
 
-    let port: number = process.env.PORT || 3000;
+    let port: number = process.env.PORT || serverConfig.defaultPort;
     app.listen(port);
     console.log('Server listening on port ' + port);
 }
