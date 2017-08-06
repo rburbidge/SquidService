@@ -8,6 +8,8 @@ var argv = require('yargs').argv,
 
 var exec = require('child_process').exec;
 
+var azureFtpUrl = '';
+
 gulp.task('default', ['transpile']);
 
 // Clean everything except the node_modules
@@ -36,18 +38,29 @@ gulp.task('run', ['default'], function(cb) {
     });
 });
 
+var ftpConfig = {
+    host:     'waws-prod-sn1-025.ftp.azurewebsites.windows.net',
+    user:     argv.user || 'SirNommington\\rburbidge1', // Note the escaped backslash
+    password: argv.pass,
+    parallel: 10,
+    log:      gutil.log
+};
+
 // Deploys the node_modules/@types folder to Azure. Needed because Azure will fail to npm install those packages for
 // some reason.
 gulp.task('deployTypes', function() {
-    var conn = ftp.create({
-        host:     'waws-prod-sn1-025.ftp.azurewebsites.windows.net',
-        user:     argv.user || 'SirNommington\\rburbidge', // Note the escaped backslash
-        password: argv.pass,
-        parallel: 10,
-        log:      gutil.log
-    });
+    var conn = ftp.create(ftpConfig);
  
     return gulp
         .src('node_modules/@types/*', { base: '.', buffer: false })
         .pipe(conn.dest('./site/wwwroot/'));
+});
+
+// Deploys the production.json config file to Azure
+gulp.task('deployProdConfig', function() {
+    var conn = ftp.create(ftpConfig);
+ 
+    return gulp
+        .src('./config/production.json')
+        .pipe(conn.dest('./site/wwwroot/config'));
 });

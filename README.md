@@ -12,11 +12,11 @@ npm install -g typescript gulp
 * Run the server locally: ```npm start```
 * Clean: ```gulp clean```
 
-## Deploying to the server
-* Deploy types to the server: ```gulp deployTypes```
+## Visual Studio Code
+Launch configs can be imported from ```./launch.json```
 
 ## Running the server
-SquidService uses https://www.npmjs.com/package/config, and requires a config file at ./config/*.json.
+SquidService uses https://www.npmjs.com/package/config, and requires a config file at ```./config/*.json```.
 
 #### Default
 This uses ```./config/default.json```, which as cloned from the repo is intentionally incomplete. Fill in ```server.database.url``` with your MongoDB connection string.
@@ -32,11 +32,18 @@ node server.js
 ```
 
 #### Custom
-To make a custom "foo" configuration, ```./config/foo.json```.
+To make a custom "foo" configuration, e.g. ```./config/foo.json```.
 ```
 set NODE_ENV=foo
 node server.js
 ```
 
-## Visual Studio Code
-Launch configs can be imported from ./launch.json
+## Deploying to Azure
+A fresh deployment to Azure looks like:
+```
+gulp deployTypes
+gulp deployProdConfig -pass=<FTP password from Azure>
+```
+
+* ```./node_modules/@types``` must be uploaded to Azure by FTP because Azure refuses to NPM sync those packages to the server.
+* ```./config/production.json``` must be deployed separately because it is intentionally not included in the repo.
