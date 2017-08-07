@@ -1,4 +1,6 @@
 # SquidService
+Squid is an app that allows a user to open web pages from Google Chrome on their Android devices. This service, built on node.js, drives device management and integrates with [Google Cloud Messaging](https://developers.google.com/cloud-messaging/) for push notifications.
+
 ## Getting started
 ```
 git clone https://github.com/rburbidge/SquidService.git
@@ -39,10 +41,10 @@ node server.js
 ```
 
 ## Deploying to Azure
-A fresh deployment to Azure looks like:
+Below are the commands for a fresh deployment. You will need credentials to deploy to Azure. These can be found in the publish profile configuration, which can be found on the [Azure Portal](https://portal.azure.com/.)
 ```
-gulp deployTypes
-gulp deployProdConfig -pass=<FTP password from Azure>
+gulp deployTypes -user=<FTP username> -pass=<FTP password>
+gulp deployProdConfig -user=<FTP username> -pass=<FTP password>
 git push azure master
 ```
 
@@ -50,6 +52,7 @@ If you don't have the azure remote yet, run:
 
 ```git remote add azure https://sirnommington.scm.azurewebsites.net:443```
 
-Notes on deployTypes and deployProdConfig commands:
-* ```./node_modules/@types``` must be uploaded to Azure by FTP because Azure refuses to NPM sync those packages to the server.
-* ```./config/production.json``` must be deployed separately because it is intentionally not included in the repo.
+### How the deployment works
+When a new commit is pushed to ```azure master```, the ```./deploy.cmd``` script runs NPM package install. The install will fail to sync the ```@types``` packages. This is why we ran ```gulp deployTypes``` earlier, which uploads those npm packages to the correct directory via FTP. ```./deploy.cmd``` will then build the service, and then launch ```node server.js```.
+
+```gulp deployProdConfig``` deploys ```./config/production.json``` to the server. This is intentionally not stored in the repo because it contains private data.
