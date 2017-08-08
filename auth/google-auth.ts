@@ -1,4 +1,4 @@
-import Google from '../services/google';
+import { Google } from '../services/google';
 import GoogleAuthHelper from './google-auth-helper';
 import AuthToken from './auth-token';
 import * as express from 'express';

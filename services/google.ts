@@ -2,7 +2,7 @@ import * as https from 'https';
 import * as express from 'express';
 var request = require('request');
 
-export default class Google {
+export class Google {
     /**
      * Checks if a google token is valid. Callback is invoked with true if the token is valid; false otherwise.
      * TODO Strongly-type the return type
@@ -52,11 +52,10 @@ export default class Google {
     }
 
     /**
-     * Sends the payload data to a device with GCM registration token. Callback is invoked with true upon success; false otherwise.
-     * TODO Strongly-type the return type
+     * Sends the payload data to a device with GCM registration token.
      */
-    public static sendGcmMessage(data, gcmToken): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
+    public static sendGcmMessage(data: IMessage, gcmToken: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
             let postData: string = JSON.stringify(
                 {
                     data: data,
@@ -87,4 +86,23 @@ export default class Google {
             googleReq.end();
         });
     }
+}
+
+/**
+ * A message to be sent to a device through GCM.
+ */
+export interface IMessage {
+    /**
+     * The type of message being sent. One of the MessageType values.
+     */
+    type: string,
+
+    /**
+     * The data being sent. e.g. a URL.
+     */
+    data: string
+}
+
+export class MessageType {
+    public static readonly Url = 'Url';
 }
