@@ -1,3 +1,4 @@
+import Validate from '../core/validate';
 import Device from '../data/models/device';
 import Devices from '../data/devices';
 import DeviceModel from '../models/device';
@@ -7,6 +8,7 @@ import googleAuth from '../auth/google-auth';
 import User from '../data/models/user';
 import * as https from 'https';
 import * as express from 'express';
+import * as tex from '../core/typed-express';
 
 /** The devices router. */
 export class DevicesRouter {
@@ -29,36 +31,19 @@ export class DevicesRouter {
         this.router.use(googleAuth);
 
         this.router.route('')
-            .get((req, res) => { this.getDevices(req, res); } )
-            .post((req, res) => { this.addDevice(req, res); });
+            .get((req, res) => { this.getDevices(req as any, res); })
+            .post((req, res) => { this.addDevice(req as any, res); })
         this.router.route('/:deviceId')
-            .delete((req, res) => { this.deleteDevice(req, res); });
+            .delete((req, res) => { this.deleteDevice(req as any, res); });
         this.router.route('/:deviceId/commands')
-            .post((req, res) => { this.command(req, res); });
-    }
-
-    /**
-     * Asserts that there are no erros on a request. Sends 400 error if there were any validation errors.
-     * @param req The request obj.
-     * @param res The response obj.
-     * @returns True iff there were no errors.
-     */
-    private static assertNoErrors(req: express.Request, res: express.Response): boolean {
-        const errors = req.validationErrors();
-        if (errors) {
-            res.status(400).send(new ErrorModel('BadRequest', 'Errors: ' + JSON.stringify(errors)));
-            return false;
-        }
-
-        return true;
+            .post((req, res) => { this.command(req as any, res); });
     }
 
     /**
      * Get the devices that a user owns.
      */
-    private getDevices(req: express.Request, res: express.Response): void {
-        const userId: string = (req as any).user;
-        this.devicesDb.getUser(userId)
+    private getDevices(req: tex.IAuthed, res: express.Response): void {
+        this.devicesDb.getUser(req.user)
             .then((user: User) => {
                 let deviceModels: DeviceModel[] = user.devices.map((value: Device) => new DeviceModel(value));
                 res.status(200).send(deviceModels);    
@@ -71,14 +56,14 @@ export class DevicesRouter {
     /**
      * Add a new device to a user. Creates the user if they do not exist.
      */
-    private addDevice(req: express.Request, res: express.Response): void {
-        (req as any).checkBody('name', 'Must pass name').notEmpty();
-        (req as any).checkBody('gcmToken', 'Must pass gcmToken').notEmpty();
-        if(!DevicesRouter.assertNoErrors(req, res)) return;
-
-        const body = req.body as AddDeviceBody;
-
-        this.devicesDb.addDevice((req as any).user, body.name, body.gcmToken)
+    @Validate(
+        function(req: express.Request)
+        {
+                req.checkBody('name', 'Must pass name').notEmpty();
+                req.checkBody('gcmToken', 'Must pass gcmToken').notEmpty();
+        })
+    private addDevice(req: tex.IBody<IAddDeviceBody>, res: express.Response): void {
+        this.devicesDb.addDevice(req.user, req.body.name, req.body.gcmToken)
             .then(device => {
                 let deviceModel = new DeviceModel(device);
                 res.status(200).send(deviceModel);
@@ -92,10 +77,11 @@ export class DevicesRouter {
     /**
      * Delete a user's device.
      * 
-     * Returns 404 if the user/device does not exist.
+     * Returns 404 if the user or device does not exist.
      */
-    private deleteDevice(req: express.Request, res: express.Response): void {
-        this.devicesDb.removeDevice((req as any).user, req.params.deviceId)
+    @Validate(DevicesRouter.validateDeviceId)
+    private deleteDevice(req: tex.IAuthed, res: express.Response): void {
+        this.devicesDb.removeDevice(req.user, req.params.deviceId)
             .then(() => {
                 console.log('Device ' + req.params.deviceId + ' deleted');
                 res.status(200).send();    
@@ -111,15 +97,11 @@ export class DevicesRouter {
      * 
      * Returns 404 if the user does not exist.
      */
-    private command(req: express.Request, res: express.Response): void {
-        req.check('deviceId', 'Must pass deviceId').notEmpty();
-        if(!DevicesRouter.assertNoErrors(req, res)) return;
-        
-        const deviceId: string = req.params.deviceId;
-
-        this.devicesDb.getUser((req as any).user)
+    @Validate(DevicesRouter.validateDeviceId)
+    private command(req: tex.IUrlParams<IDeviceUrlParams>, res: express.Response): void {
+        this.devicesDb.getUser(req.user)
             .then(user => {
-                let device: Device = user.devices.filter(d => d.id === deviceId)[0];
+                let device: Device = user.devices.filter(d => d.id === req.params.deviceId)[0];
                 if(!device) {
                     res.status(404).send('Device does not exist');
                     return;
@@ -142,10 +124,20 @@ export class DevicesRouter {
                 res.status(404).send('User does not exist');
                 return;
             });
-    } 
+    }
+
+    /** Validates that there is a non-empty device ID URL parameter. */
+    private static validateDeviceId(req: express.Request) {
+        req.check('deviceId', 'Must pass deviceId').notEmpty();
+    }
 }
 
-interface AddDeviceBody {
+interface IDeviceUrlParams {
+    /** The device ID. */
+    deviceId: string
+}
+
+interface IAddDeviceBody {
     /** The device name. */
     name: string;
 
