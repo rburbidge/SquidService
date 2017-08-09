@@ -3,6 +3,7 @@ import Devices from './data/devices';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import devicesRouter from './routes/devices';
+import indexRouter from './routes/index';
 import requestLogger from './logging/request-logger';
 import * as mongodb from 'mongodb';
 var validator = require('express-validator');
@@ -28,10 +29,9 @@ function onDbConnected(db: mongodb.Db) {
     app.use(bodyParser.json());
     app.use(validator());
     app.use(requestLogger);
-    app.get('/', (req, res) => {
-        res.writeHead(200);
-        res.end('Hello Server2');
-    });
+
+    // Routers
+    app.use('', indexRouter());
     app.use('/api/devices', devicesRouter(devices));
 
     let port: number = process.env.PORT || serverConfig.defaultPort;
