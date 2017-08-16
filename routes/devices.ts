@@ -30,6 +30,8 @@ export class DevicesRouter {
     private init(devicesDb: Devices): void {
         this.router.use(googleAuth);
 
+        // Note that this is the only place in the code where 'any' is allowed
+        // There is no way to ensure that requests match contracts is to write auto-generated validators from TS interfaces
         this.router.route('')
             .get((req, res) => { this.getDevices(req as any, res); })
             .post((req, res) => { this.addDevice(req as any, res); })
@@ -43,7 +45,7 @@ export class DevicesRouter {
      * Get the devices that a user owns.
      */
     private getDevices(req: tex.IAuthed, res: express.Response): void {
-        this.devicesDb.getUser(req.user)
+        this.devicesDb.getUser(req.user.id)
             .then((user: User) => {
                 let deviceModels: DeviceModel[] = user.devices.map((value: Device) => new DeviceModel(value));
                 res.status(200).send(deviceModels);    
@@ -63,7 +65,7 @@ export class DevicesRouter {
                 req.checkBody('gcmToken', 'Must pass gcmToken').notEmpty();
         })
     private addDevice(req: tex.IBody<IAddDeviceBody>, res: express.Response): void {
-        this.devicesDb.addDevice(req.user, req.body.name, req.body.gcmToken)
+        this.devicesDb.addDevice(req.user.id, req.body.name, req.body.gcmToken)
             .then(device => {
                 let deviceModel = new DeviceModel(device);
                 res.status(200).send(deviceModel);
@@ -81,7 +83,7 @@ export class DevicesRouter {
      */
     @Validate(DevicesRouter.validateDeviceId)
     private deleteDevice(req: tex.IAuthed, res: express.Response): void {
-        this.devicesDb.removeDevice(req.user, req.params.deviceId)
+        this.devicesDb.removeDevice(req.user.id, req.params.deviceId)
             .then(() => {
                 console.log('Device ' + req.params.deviceId + ' deleted');
                 res.status(200).send();    
@@ -99,7 +101,7 @@ export class DevicesRouter {
      */
     @Validate(DevicesRouter.validateDeviceId)
     private command(req: tex.IUrlParams<IDeviceUrlParams>, res: express.Response): void {
-        this.devicesDb.getUser(req.user)
+        this.devicesDb.getUser(req.user.id)
             .then(user => {
                 let device: Device = user.devices.filter(d => d.id === req.params.deviceId)[0];
                 if(!device) {

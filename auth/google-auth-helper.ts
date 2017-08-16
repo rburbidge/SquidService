@@ -1,21 +1,16 @@
-import AuthToken from './auth-token';
+import { TokenType } from './token-type';
+import { AuthToken } from './auth-token';
 
 /**
  * Helper for parsing Google tokens from Authorization header.
  */
 export default class GoogleAuthHelper {
     /**
-     * Using static properties rather than an enum because the values are also the query string keys.
-     */
-    public static Access: string = 'access_token';
-    public static Id: string = 'id_token';
-
-    /**
      * Map of auth header token prefix to the token type.
      */
     private static tokenPrefixToType: { [key: string]: string} = {
-        'Bearer Google OAuth Access Token=': GoogleAuthHelper.Access,
-        'Bearer Google OAuth ID Token=': GoogleAuthHelper.Id
+        'Bearer Google OAuth Access Token=': TokenType.Access,
+        'Bearer Google OAuth ID Token=': TokenType.Id
     }
 
     /**
