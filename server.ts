@@ -1,15 +1,17 @@
-import IConfig from './config/config';
-import Devices from './data/devices';
-import * as express from 'express';
+import { Config}  from './config/config';
+import { Devices } from './data/devices';
+import { devicesRouter } from './routes/devices';
+import { indexRouter}  from './routes/index';
+import { logger } from './logging/request-logger';
+
 import * as bodyParser from 'body-parser';
-import devicesRouter from './routes/devices';
-import indexRouter from './routes/index';
-import requestLogger from './logging/request-logger';
+import * as express from 'express';
 import * as mongodb from 'mongodb';
+
 var validator = require('express-validator');
 var config = require('config');
 
-let serverConfig = config.get('server') as IConfig;
+let serverConfig = config.get('server') as Config;
 
 let mongoClient: mongodb.MongoClient = mongodb.MongoClient;
 mongoClient.connect(serverConfig.database.url, (err, db) => {
@@ -28,7 +30,7 @@ function onDbConnected(db: mongodb.Db) {
     let app: express.Application = express();
     app.use(bodyParser.json());
     app.use(validator());
-    app.use(requestLogger);
+    app.use(logger);
 
     // Routers
     app.use('', indexRouter());

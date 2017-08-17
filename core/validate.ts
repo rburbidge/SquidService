@@ -1,5 +1,6 @@
+import { ErrorModel } from '../models/error-model';
+
 import * as express from 'express';
-import ErrorModel from '../models/error-model';
 
 /**
  * Executes a validation function to be applied to a method.
@@ -19,7 +20,7 @@ import ErrorModel from '../models/error-model';
  * If validation fails, then a 404 response will be sent and functionToBeValidated() will not be called.
  * @param validate The validation function.
  */
-export default function Validate(validate: IValidator) {
+export function Validate(validate: IValidator) {
     if(!validate) {
         throw 'Call Validate() with a validation function';
     }

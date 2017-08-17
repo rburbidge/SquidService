@@ -1,11 +1,11 @@
-import Validate from '../core/validate';
-import Device from '../data/models/device';
-import Devices from '../data/devices';
-import DeviceModel from '../models/device';
-import ErrorModel from '../models/error-model';
+import { Validate } from '../core/validate';
+import { Device } from '../data/models/device';
+import { Devices } from '../data/devices';
+import { DeviceModel } from '../models/device';
+import { ErrorModel } from '../models/error-model';
 import { Google, MessageType } from '../services/google';
-import googleAuth from '../auth/google-auth';
-import User from '../data/models/user';
+import { googleAuth} from '../auth/google-auth';
+import { User } from '../data/models/user';
 import * as https from 'https';
 import * as express from 'express';
 import * as tex from '../core/typed-express';
@@ -151,7 +151,7 @@ interface IAddDeviceBody {
  * Creates the devices express router.
  * @param devicesDb The devices database.
  */
-export default function(devicesDb: Devices): express.Router {
+export function devicesRouter(devicesDb: Devices): express.Router {
     const router = new DevicesRouter(devicesDb);
     return router.router;
 }

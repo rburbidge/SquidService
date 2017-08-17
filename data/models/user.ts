@@ -1,8 +1,7 @@
-import Device from './device';
+import { Device } from './device';
 
-interface User {
-
-    //TODO Scope these to Google
+/** A user in the database. */
+export interface User {
     /**
      * The user ID.
      */
@@ -13,5 +12,3 @@ interface User {
      */
     devices: Device[];
 }
-
-export default User;

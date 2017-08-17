@@ -75,7 +75,7 @@ class GoogleAuth {
  * 
  * If auth is successful, sets the user identity to req.user. Otherwise, returns a 401 with a detailed error message.
  */
-export default function(req: tex.IAuthed, res: express.Response, next: express.NextFunction) {
+export function googleAuth(req: tex.IAuthed, res: express.Response, next: express.NextFunction) {
     GoogleAuth.authenticate(req)
         .then((user: User) => {
             req.user = user;
