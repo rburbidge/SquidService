@@ -1,8 +1,9 @@
+import { User }  from '../auth/user';
 import * as express from 'express';
 
 export interface IAuthed extends express.Request {
-    /** The user ID provided by auth. */
-    user: string;
+    /** The user provided by auth. */
+    user: User;
 }
 
 export interface IBody<TBody> extends IAuthed {

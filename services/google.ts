@@ -1,13 +1,19 @@
+import { User } from '../auth/user';
+import { TokenType } from '../auth/token-type';
+
 import * as https from 'https';
 import * as express from 'express';
 var request = require('request');
 
+/** Contains helpers to access Google services. */
 export class Google {
     /**
-     * Checks if a google token is valid. Callback is invoked with true if the token is valid; false otherwise.
-     * TODO Strongly-type the return type
+     * Checks if a Google token is valid.
+     * 
+     * If the token is an access token, then this will return true because an access token contains no user data.
+     * If the token is an ID token, then this will return the user info contained within.
      */
-    public static getTokenInfo(tokenType: string, token: string): Promise<any> {
+    public static getTokenInfo(tokenType: string, token: string): Promise<User> {
         return new Promise<any>((resolve, reject) => {
             // TODO fix this
             // Use request rather than https module here because it provides free response body parsing
@@ -23,18 +29,28 @@ export class Google {
                     } else if(response.statusCode != 200) {
                         reject('response.statusCode=' + response.statusCode + ', body=' + body);
                     } else {
-                        resolve(body);
+                        if(tokenType == TokenType.Id) {
+                            resolve(User.fromIdToken(body));
+                        } else if(tokenType == TokenType.Access) {
+                            resolve(true);
+                        } else {
+                            reject(`Unknown tokenType=${tokenType}`);
+                        }
                     }
                 });
         });
     }
 
-    // TODO Document why this is used as opposed to getTokenInfo()
-    // TODO Strongly-type the return type
-    public static getUserInfo(accessToken): Promise<any> {
+    /**
+     * Retrieves the user info for an access token.
+     * 
+     * Required because access tokens do not contain the user info, such as the user's unique ID.
+     * @param accessToken The access token.
+     */
+    public static getUserInfo(accessToken: string): Promise<User> {
         return new Promise<any>((resolve, reject) => {
-            // TODO fix this
             // Use request rather than https module here because it provides free response body parsing
+            // TODO Move away from using request
             request({
                     url: `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`,
                     json: true
@@ -45,7 +61,7 @@ export class Google {
                     } else if(response.statusCode != 200) {
                         reject('response.statusCode=' + response.statusCode + ', body=' + body);
                     } else {
-                        resolve(body);
+                        resolve(User.fromUserInfo(body));
                     }
                 });
         });
@@ -86,6 +102,35 @@ export class Google {
             googleReq.end();
         });
     }
+}
+
+/**
+ * TODO Get URL for dev guide for this API.
+ */
+export interface IGoogleIdToken {
+    /** The user name. */
+    name?: string;
+
+    /** The user profile picture. */
+    picture?: string;
+
+    /**
+     * The unique identity of the user.
+     * From https://developers.google.com/identity/protocols/OpenIDConnect
+     * An identifier for the user, unique among all Google accounts and never reused. A Google account can have multiple emails at different points in time, but the sub value is never changed. Use sub within your application as the unique-identifier key for the user.
+     */
+    sub: string;
+}
+
+/**
+ * TODO Get URL for dev guide for this API.
+ */
+export interface IGoogleUserInfo extends IGoogleIdToken {
+    /** The user email. */
+    email?: string;
+
+    /** The user gender. */
+    gender?: string;
 }
 
 /**
