@@ -5,10 +5,13 @@ import * as https from 'https';
 import * as express from 'express';
 var request = require('request');
 
-// TODO Need to fix comments in this class
+/** Contains helpers to access Google services. */
 export class Google {
     /**
-     * Checks if a google token is valid. Callback is invoked with true if the token is valid; false otherwise.
+     * Checks if a Google token is valid.
+     * 
+     * If the token is an access token, then this will return true because an access token contains no user data.
+     * If the token is an ID token, then this will return the user info contained within.
      */
     public static getTokenInfo(tokenType: string, token: string): Promise<User> {
         return new Promise<any>((resolve, reject) => {
@@ -38,11 +41,16 @@ export class Google {
         });
     }
 
-    // TODO Document why this is used as opposed to getTokenInfo()
-    public static getUserInfo(accessToken): Promise<User> {
+    /**
+     * Retrieves the user info for an access token.
+     * 
+     * Required because access tokens do not contain the user info, such as the user's unique ID.
+     * @param accessToken The access token.
+     */
+    public static getUserInfo(accessToken: string): Promise<User> {
         return new Promise<any>((resolve, reject) => {
-            // TODO fix this
             // Use request rather than https module here because it provides free response body parsing
+            // TODO Move away from using request
             request({
                     url: `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`,
                     json: true

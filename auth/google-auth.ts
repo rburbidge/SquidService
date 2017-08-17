@@ -20,7 +20,6 @@ class GoogleAuth {
      */
     public static authenticate(req: express.Request): Promise<User> {
         const parsedAuthHeader = GoogleAuth.parseAuthHeader(req);
-        
         console.log(`Google ${parsedAuthHeader.tokenType} received. Validating...`);
 
         return Google.getTokenInfo(parsedAuthHeader.tokenType, parsedAuthHeader.token)
@@ -43,14 +42,14 @@ class GoogleAuth {
                     case TokenType.Id:
                         return Promise.resolve(user);
                     case TokenType.Access:
-                        console.log('Getting user ID for access_token');
+                        console.log('Getting user info for access_token');
                         return Google.getUserInfo(parsedAuthHeader.token);
                 }
             });
     }
  
     /**
-     * Parses the authentication header in format <auth header prefix>: <token value> into a token type and value
+     * Parses the authentication header in format "<auth header prefix>: <token value>" into a token type and value
      */
     private static parseAuthHeader(req: express.Request): AuthToken {
         // Extract the token and return an error immediately if not found
@@ -74,7 +73,7 @@ class GoogleAuth {
 /**
  * Authenticates the a request, expecting with either a Google ID token or access token.
  * 
- * If auth is successful, adds the user identity to req.user. Otherwise, returns a 401 with a detailed error message.
+ * If auth is successful, sets the user identity to req.user. Otherwise, returns a 401 with a detailed error message.
  */
 export default function(req: tex.IAuthed, res: express.Response, next: express.NextFunction) {
     GoogleAuth.authenticate(req)
