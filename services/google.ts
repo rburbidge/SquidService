@@ -1,4 +1,4 @@
-import { User } from '../models/user';
+import { User } from '../auth/user';
 import { TokenType } from '../auth/token-type';
 
 import * as https from 'https';

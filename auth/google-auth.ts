@@ -2,7 +2,7 @@ import { Google } from '../services/google';
 import GoogleAuthHelper from './google-auth-helper';
 import { AuthToken } from './auth-token';
 import { TokenType } from './token-type';
-import { User } from '../models/user';
+import { User } from './user';
 import * as express from 'express';
 import * as tex from '../core/typed-express'
 

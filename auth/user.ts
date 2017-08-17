@@ -1,5 +1,6 @@
 import { IGoogleUserInfo, IGoogleIdToken } from '../services/google'
 
+/** An identity object that is created during authentication. */
 export class User {
     /**
      * @param id Unique user ID.

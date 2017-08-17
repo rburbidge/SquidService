@@ -1,4 +1,4 @@
-import { User}  from '../models/user';
+import { User }  from '../auth/user';
 import * as express from 'express';
 
 export interface IAuthed extends express.Request {
