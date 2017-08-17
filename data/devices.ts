@@ -1,12 +1,12 @@
-import User from './models/user';
-import Device from './models/device';
+import { User } from './models/user';
+import { Device } from './models/device';
 import * as mongodb from 'mongodb';
 let uuid = require('uuid');
 
 /**
  * The devices database.
  */
-export default class Devices {
+export class Devices {
 
     private collection: mongodb.Collection;
 

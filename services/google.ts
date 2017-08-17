@@ -15,8 +15,8 @@ export class Google {
      */
     public static getTokenInfo(tokenType: string, token: string): Promise<User> {
         return new Promise<any>((resolve, reject) => {
-            // TODO fix this
             // Use request rather than https module here because it provides free response body parsing
+            // TODO Move away from using request
             request({
                     url: `https://www.googleapis.com/oauth2/v3/tokeninfo?${tokenType}=${token}`,
                     json: true

@@ -1,4 +1,4 @@
-export default class ErrorModel {
+export class ErrorModel {
     code: string; // TODO this should be an enum
     message: string;
     errors: any

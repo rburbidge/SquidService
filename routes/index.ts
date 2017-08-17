@@ -14,6 +14,6 @@ class IndexRouter {
 }
 
 /** Creates the index express router. */
-export default function indexRouter(): express.Router {
+export function indexRouter(): express.Router {
     return new IndexRouter().router;
 }

@@ -1,4 +1,4 @@
-export default  interface IConfig {
+export interface Config {
 
     /** The server port that will be used if process.env.PORT is not defined. */
     defaultPort: number;

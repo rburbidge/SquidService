@@ -1,6 +1,6 @@
-import Device from '../data/models/device';
+import { Device } from '../data/models/device';
 
-export default class DeviceModel {
+export class DeviceModel {
     id: string;
     name: string;
 

@@ -1,4 +1,4 @@
-interface Device {
+export interface Device {
     /* The device ID, defined by the server. */
     id: string;
 
@@ -8,5 +8,3 @@ interface Device {
     /* The Google Cloud Messaging token, from the Android device. */
     gcmToken: string;
 }
-
-export default Device;

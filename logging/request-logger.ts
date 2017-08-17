@@ -4,7 +4,7 @@ import * as express from 'express';
  * Logs the basic information about a request.
  * Logs request method, begin/end, and response status code.
  */
-export default function(req: express.Request, res: express.Response, next: express.NextFunction) {
+export function logger(req: express.Request, res: express.Response, next: express.NextFunction) {
     let operation: string = req.method + ' ' + req.baseUrl;
     console.log('Begin ' + operation);
 
