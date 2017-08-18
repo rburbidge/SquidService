@@ -61,12 +61,12 @@ export class DevicesRouter {
     @Validate(
         function(req: express.Request)
         {
-                req.checkBody('name', 'Must pass name').notEmpty();
-                req.checkBody('gcmToken', 'Must pass gcmToken').notEmpty();
+            req.checkBody('name', 'Must pass name').notEmpty();
+            req.checkBody('gcmToken', 'Must pass gcmToken').notEmpty();
         })
     private addDevice(req: tex.IBody<IAddDeviceBody>, res: express.Response): void {
         this.devicesDb.addDevice(req.user.id, req.body.name, req.body.gcmToken)
-            .then(device => {
+            .then((device: Device) => {
                 let deviceModel = new DeviceModel(device);
                 res.status(200).send(deviceModel);
             })
@@ -84,9 +84,11 @@ export class DevicesRouter {
     @Validate(DevicesRouter.validateDeviceId)
     private deleteDevice(req: tex.IAuthed, res: express.Response): void {
         this.devicesDb.removeDevice(req.user.id, req.params.deviceId)
-            .then(() => {
-                console.log('Device ' + req.params.deviceId + ' deleted');
-                res.status(200).send();    
+            .then((deleted: boolean) => {
+                console.log(deleted
+                    ? 'Device ' + req.params.deviceId + ' deleted'
+                    : 'Device ' + req.params.deviceId + ' did NOT exist');
+                res.status(200).send();
             })
             .catch(() => {
                 console.log('User does not exist');
