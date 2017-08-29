@@ -64,6 +64,23 @@ export class Devices {
     }
 
     /**
+     * Returns the first device with a GCM token if it exists.
+     * @param userId The user ID to search under.
+     * @returns Undefined if there is no device matching the GCM token.
+     */
+    public getDevice(userId: string, gcmToken: string): Promise<Device> {
+        return this.getUser(userId)
+            .then((user) => {
+                if(!user || !user.devices) return;
+
+                const devicesWithGcmToken = user.devices.filter(device => device.gcmToken == gcmToken);
+                if(devicesWithGcmToken.length > 0) {
+                    return devicesWithGcmToken[0];
+                }
+            });
+    }
+
+    /**
      * Removes a user's device.
      * @param userId The user ID.
      * @param deviceId The device ID.
