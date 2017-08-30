@@ -2,9 +2,9 @@ import { Validate } from '../core/validate';
 import { Device } from '../data/models/device';
 import { Devices } from '../data/devices';
 import { DeviceModel } from '../models/device';
-import { ErrorModel } from '../models/error-model';
+import { ErrorModel, ErrorCode } from '../models/error-model';
 import { Google, MessageType } from '../services/google';
-import { googleAuth} from '../auth/google-auth';
+import { googleAuth } from '../auth/google-auth';
 import { User } from '../data/models/user';
 import * as https from 'https';
 import * as express from 'express';
@@ -18,8 +18,9 @@ export class DevicesRouter {
     /**
      * Creates a new instance.
      * @param devicesDb The devices database.
+     * @param google The Google service.
      */
-    constructor(private readonly devicesDb: Devices) {
+    constructor(private readonly devicesDb: Devices, private readonly google: Google) {
         this.router = express.Router();
 
         this.devicesDb = devicesDb;
@@ -28,7 +29,7 @@ export class DevicesRouter {
 
     /** Initializes the router. */
     private init(devicesDb: Devices): void {
-        this.router.use(googleAuth);
+        this.router.use(googleAuth(this.google));
 
         // Note that this is the only place in the code where 'any' is allowed
         // There is no way to ensure that requests match contracts is to write auto-generated validators from TS interfaces
@@ -51,7 +52,7 @@ export class DevicesRouter {
                 res.status(200).send(deviceModels);    
             })
             .catch((error) => {
-                res.status(404).send(new ErrorModel('UserNotFound', 'The user does not exist'));
+                res.status(404).send(new ErrorModel(ErrorCode.UserNotFound, 'The user does not exist'));
             });
     }
 
@@ -80,7 +81,7 @@ export class DevicesRouter {
             })
             .catch((error) => {
                 console.log('Add device failed: ' + error);
-                res.status(500).send(new ErrorModel('Unknown', 'Device could not be added'));
+                res.status(500).send(new ErrorModel(ErrorCode.Unknown, 'Device could not be added'));
             });
     }
 
@@ -119,7 +120,7 @@ export class DevicesRouter {
                     return;
                 }
 
-                Google.sendGcmMessage(
+                this.google.sendGcmMessage(
                     {
                         type: MessageType.Url,
                         data: req.body.url,
@@ -161,7 +162,7 @@ interface IAddDeviceBody {
  * Creates the devices express router.
  * @param devicesDb The devices database.
  */
-export function devicesRouter(devicesDb: Devices): express.Router {
-    const router = new DevicesRouter(devicesDb);
+export function devicesRouter(devicesDb: Devices, google: Google): express.Router {
+    const router = new DevicesRouter(devicesDb, google);
     return router.router;
 }

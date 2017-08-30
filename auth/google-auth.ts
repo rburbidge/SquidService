@@ -1,5 +1,5 @@
 import { Google } from '../services/google';
-import GoogleAuthHelper from './google-auth-helper';
+import { GoogleAuthHelper } from './google-auth-helper';
 import { AuthToken } from './auth-token';
 import { TokenType } from './token-type';
 import { User } from './user';
@@ -7,6 +7,10 @@ import * as express from 'express';
 import * as tex from '../core/typed-express'
 
 class GoogleAuth {
+
+    /** Creates a new instance. */
+    constructor(private readonly google: Google) { }
+
     /**
      * Authenticate a request.
      * 
@@ -18,11 +22,11 @@ class GoogleAuth {
      * Access tokens do not contain the user ID, but we obtain it by making a call to Google getUserInfo.
      * @returns a user if the request has AuthZ, and throws otherwise.
      */
-    public static authenticate(req: express.Request): Promise<User> {
+    public authenticate(req: express.Request): Promise<User> {
         const parsedAuthHeader = GoogleAuth.parseAuthHeader(req);
         console.log(`Google ${parsedAuthHeader.tokenType} received. Validating...`);
 
-        return Google.getTokenInfo(parsedAuthHeader.tokenType, parsedAuthHeader.token)
+        return this.google.getTokenInfo(parsedAuthHeader.tokenType, parsedAuthHeader.token)
             // 1. Get the token info for either access token or ID token
             //    If this succeeds, then we have AuthZ
             .then((tokenInfo) => {
@@ -71,12 +75,15 @@ class GoogleAuth {
 }
 
 /**
- * Authenticates the a request, expecting with either a Google ID token or access token.
+ * Creates a express.RequestHandler that will authorize the request with either a Google ID or access token.
  * 
  * If auth is successful, sets the user identity to req.user. Otherwise, returns a 401 with a detailed error message.
  */
-export function googleAuth(req: tex.IAuthed, res: express.Response, next: express.NextFunction) {
-    GoogleAuth.authenticate(req)
+export function googleAuth(google: Google): express.RequestHandler {
+    const googleAuth = new GoogleAuth(google);
+
+    return (req: tex.IAuthed, res: express.Response, next: express.NextFunction) => {
+        googleAuth.authenticate(req)
         .then((user: User) => {
             req.user = user;
             console.log('User is authZd');
@@ -85,4 +92,5 @@ export function googleAuth(req: tex.IAuthed, res: express.Response, next: expres
         .catch((error: any) => {
             res.status(401).send(error);
         })
+    }
 }

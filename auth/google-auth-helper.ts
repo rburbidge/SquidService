@@ -4,7 +4,7 @@ import { AuthToken } from './auth-token';
 /**
  * Helper for parsing Google tokens from Authorization header.
  */
-export default class GoogleAuthHelper {
+export class GoogleAuthHelper {
     /**
      * Map of auth header token prefix to the token type.
      */
