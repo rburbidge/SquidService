@@ -7,6 +7,12 @@ var request = require('request');
 
 /** Contains helpers to access Google services. */
 export class Google {
+
+    /**
+     * @param apiKey The API key used to send GCM messages.
+     */
+    constructor(private apiKey: string) { }
+
     /**
      * Checks if a Google token is valid.
      * 
@@ -70,7 +76,7 @@ export class Google {
     /**
      * Sends the payload data to a device with GCM registration token.
      */
-    public static sendGcmMessage(data: IMessage, gcmToken: string): Promise<void> {
+    public sendGcmMessage(data: IMessage, gcmToken: string): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             let postData: string = JSON.stringify(
                 {
@@ -78,13 +84,12 @@ export class Google {
                     to: gcmToken
                 });
 
-            // TODO Do not hardcode API key
             let options: https.RequestOptions = {
                 method: 'POST',
                 host: 'gcm-http.googleapis.com',
                 path: '/gcm/send',
                 headers: {
-                    Authorization: 'key=AIzaSyC5NfTAr56W2v7hRpsRhO11PqcHODVcwOU',
+                    Authorization: 'key=' + this.apiKey,
                     'Content-Type': 'application/json', 
                     'Content-Length': postData.length
                 }

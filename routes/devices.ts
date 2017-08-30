@@ -18,8 +18,9 @@ export class DevicesRouter {
     /**
      * Creates a new instance.
      * @param devicesDb The devices database.
+     * @param google The Google service.
      */
-    constructor(private readonly devicesDb: Devices) {
+    constructor(private readonly devicesDb: Devices, private readonly google: Google) {
         this.router = express.Router();
 
         this.devicesDb = devicesDb;
@@ -111,7 +112,7 @@ export class DevicesRouter {
                     return;
                 }
 
-                Google.sendGcmMessage(
+                this.google.sendGcmMessage(
                     {
                         type: MessageType.Url,
                         data: req.body.url,
@@ -153,7 +154,7 @@ interface IAddDeviceBody {
  * Creates the devices express router.
  * @param devicesDb The devices database.
  */
-export function devicesRouter(devicesDb: Devices): express.Router {
-    const router = new DevicesRouter(devicesDb);
+export function devicesRouter(devicesDb: Devices, google: Google): express.Router {
+    const router = new DevicesRouter(devicesDb, google);
     return router.router;
 }
