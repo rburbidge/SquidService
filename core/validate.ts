@@ -1,4 +1,4 @@
-import { ErrorModel } from '../models/error-model';
+import { ErrorModel, ErrorCode } from '../models/error-model';
 
 import * as express from 'express';
 
@@ -34,7 +34,7 @@ export function Validate(validate: IValidator) {
             const errors = req.validationErrors();
             if (errors) {
                 res.status(400).send(new ErrorModel(
-                    'BadRequest', 'Malformed request', errors as ExpressValidator.MappedError[]));
+                    ErrorCode.BadRequest, 'Malformed request', errors as ExpressValidator.MappedError[]));
                 return;
             }
 

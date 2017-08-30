@@ -2,7 +2,7 @@ import { Validate } from '../core/validate';
 import { Device } from '../data/models/device';
 import { Devices } from '../data/devices';
 import { DeviceModel } from '../models/device';
-import { ErrorModel } from '../models/error-model';
+import { ErrorModel, ErrorCode } from '../models/error-model';
 import { Google, MessageType } from '../services/google';
 import { googleAuth} from '../auth/google-auth';
 import { User } from '../data/models/user';
@@ -51,7 +51,7 @@ export class DevicesRouter {
                 res.status(200).send(deviceModels);    
             })
             .catch((error) => {
-                res.status(404).send(new ErrorModel('UserNotFound', 'The user does not exist'));
+                res.status(404).send(new ErrorModel(ErrorCode.UserNotFound, 'The user does not exist'));
             });
     }
 
@@ -72,8 +72,8 @@ export class DevicesRouter {
             })
             .catch(error => {
                 console.log('Add device failed: ' + error);
-                res.status(500).send(new ErrorModel('Unknown', 'Device could not be added'));
-            })
+                res.status(500).send(new ErrorModel(ErrorCode.Unknown, 'Device could not be added'));
+            });
     }
 
     /**
