@@ -4,7 +4,7 @@ import { Devices } from '../data/devices';
 import { DeviceModel } from '../models/device';
 import { ErrorModel, ErrorCode } from '../models/error-model';
 import { Google, MessageType } from '../services/google';
-import { googleAuth} from '../auth/google-auth';
+import { googleAuth } from '../auth/google-auth';
 import { User } from '../data/models/user';
 import * as https from 'https';
 import * as express from 'express';
@@ -29,7 +29,7 @@ export class DevicesRouter {
 
     /** Initializes the router. */
     private init(devicesDb: Devices): void {
-        this.router.use(googleAuth);
+        this.router.use(googleAuth(this.google));
 
         // Note that this is the only place in the code where 'any' is allowed
         // There is no way to ensure that requests match contracts is to write auto-generated validators from TS interfaces

@@ -1,5 +1,8 @@
 export class ErrorModel {
-    /** A string representation of the error code that was passed in. */
+    /**
+     * A string representation of the error code. e.g. "UserNotFound"
+     * @see code
+     */
     public readonly codeString: string;
 
     /**
@@ -25,9 +28,15 @@ export enum ErrorCode {
     /** An unknown error occurred. */
     Unknown = 0,
 
+    /** The service was not configured correctly. */
+    ServiceConfig = 1,
+
+    /** The request could not be authorized. */
+    Authorization = 2,
+
     /** The user sent an invalid request. */
-    BadRequest = 1,
+    BadRequest = 3,
 
     /** The user to be operated upon was not found. */
-    UserNotFound = 2
+    UserNotFound = 4,
 }

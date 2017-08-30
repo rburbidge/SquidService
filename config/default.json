@@ -2,6 +2,7 @@
     "server": {
         "defaultPort": 3000,
         "googleApiKey": null, // Fill in
+        "googleValidClientIds": null, // Fill in
         "database": {
             "url": null // Fill in
         }

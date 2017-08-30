@@ -28,7 +28,7 @@ function onDbConnected(db: mongodb.Db) {
     // Create dependencies
     const devicesDb: mongodb.Collection = db.collection('userDevices');
     const devices: Devices = new Devices(devicesDb);
-    const google: Google = new Google(serverConfig.googleApiKey);
+    const google: Google = new Google(serverConfig.googleApiKey, serverConfig.googleValidClientIds);
 
     // Bootstrap server and pipeline
     const app: express.Application = express();
