@@ -66,12 +66,20 @@ export class DevicesRouter {
             req.checkBody('gcmToken', 'Must pass gcmToken').notEmpty();
         })
     private addDevice(req: tex.IBody<IAddDeviceBody>, res: express.Response): void {
-        this.devicesDb.addDevice(req.user.id, req.body.name, req.body.gcmToken)
-            .then((device: Device) => {
-                let deviceModel = new DeviceModel(device);
-                res.status(200).send(deviceModel);
+        // Create the device/user if one with the same GCM token does not exist
+        this.devicesDb.getDevice(req.user.id, req.body.gcmToken)
+            .then(device => {
+                if(device) {
+                    return Promise.resolve({ device: device, added: false});
+                }
+                return this.devicesDb.addDevice(req.user.id, req.body.name, req.body.gcmToken)
+                    .then(device => { return { device: device, added: true }});
             })
-            .catch(error => {
+            .then(addDeviceResult => {
+                res.status(addDeviceResult.added ? 200 : 302)
+                   .send(new DeviceModel(addDeviceResult.device));
+            })
+            .catch((error) => {
                 console.log('Add device failed: ' + error);
                 res.status(500).send(new ErrorModel(ErrorCode.Unknown, 'Device could not be added'));
             });
