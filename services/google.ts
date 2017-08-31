@@ -2,9 +2,7 @@ import { ErrorModel, ErrorCode } from '../models/error-model'
 import { User } from '../auth/user';
 import { TokenType } from '../auth/token-type';
 
-import * as https from 'https';
-import * as express from 'express';
-var request = require('request');
+const axios = require('axios');
 
 /** Contains helpers to access Google services. */
 export class Google {
@@ -12,7 +10,7 @@ export class Google {
     /**
      * Creates a new instance.
      * @param apiKey The API key used to send GCM messages.
-     * @param clientIds The set of valid Google client IDs.
+     * @param clientIds The whitelist of valid Google client IDs.
      */
     constructor(private readonly apiKey: string, private readonly clientIds: Array<string>) { }
 
@@ -23,36 +21,29 @@ export class Google {
      * If the token is an ID token, then this will return the user info contained within.
      */
     public getTokenInfo(tokenType: string, token: string): Promise<User> {
-        return new Promise<any>((resolve, reject) => {
-            // Use request rather than https module here because it provides free response body parsing
-            // TODO Move away from using request
-            request({
-                    url: `https://www.googleapis.com/oauth2/v3/tokeninfo?${tokenType}=${token}`,
-                    json: true
-                },
-                (error, response, body: IGoogleIdToken) => {
-                    if(error) {
-                        reject(new ErrorModel(ErrorCode.Authorization, 'Error validating Google token: ' +
-                            JSON.stringify(error)));
-                    } else if(response.statusCode != 200) {
-                        reject(new ErrorModel(ErrorCode.Authorization, 'Error validating Google token: response.statusCode=' +
-                            response.statusCode + ', body=' + body));
-                    } else if(!this.clientIds) {
-                        reject(new ErrorModel(ErrorCode.ServiceConfig, 'Google clientIds is null'));
-                    } else if(this.clientIds.indexOf(body.aud) == -1) {
-                        reject(new ErrorModel(ErrorCode.Authorization, 'Google token had invalid client ID in aud field:' +
-                            body.aud));
-                    } else if(tokenType == TokenType.Id) {
-                        resolve(User.fromIdToken(body));
-                    } else if(tokenType == TokenType.Access) {
-                        // In access token case, we need to get user information from another API first, so we don't have
-                        // a full user object yet. Return true to indicate that auth succeeded
-                        resolve(true);
-                    } else {
-                        reject(new ErrorModel(ErrorCode.BadRequest, `Unknown tokenType=${tokenType}`));
-                    }
-                });
-        });
+        return axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?${tokenType}=${token}`)
+            .then(response => {
+                const body: IGoogleIdToken = response.data;
+
+                // Verify that token client ID matches whitelist of client IDs
+                if(!this.clientIds) throw new ErrorModel(ErrorCode.ServiceConfig, 'Google clientIds is null');                
+                if(this.clientIds.indexOf(body.aud) == -1) throw new ErrorModel(
+                    ErrorCode.Authorization, 'Google token had invalid client ID in aud field:' + body.aud);
+
+                switch(tokenType) {
+                    case TokenType.Id: return User.fromIdToken(body);
+
+                    // In access token case, we need to get user information from another API first, so we don't have
+                    // a full user object yet. Return true to indicate that auth succeeded
+                    case TokenType.Access: return true;
+
+                    // Uknown token types
+                    default: throw new ErrorModel(ErrorCode.BadRequest, `Unknown tokenType=${tokenType}`);
+                }
+            })
+            .catch((error) => {
+                throw new ErrorModel(ErrorCode.Authorization, 'Error validating Google token: ' + JSON.stringify(error));
+            });
     }
 
     /**
@@ -62,58 +53,39 @@ export class Google {
      * @param accessToken The access token.
      */
     public static getUserInfo(accessToken: string): Promise<User> {
-        return new Promise<any>((resolve, reject) => {
-            // Use request rather than https module here because it provides free response body parsing
-            // TODO Move away from using request
-            request({
-                    url: `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`,
-                    json: true
-                },
-                function(error, response, body) {
-                    if(error) {
-                        reject(error);
-                    } else if(response.statusCode != 200) {
-                        reject('response.statusCode=' + response.statusCode + ', body=' + body);
-                    } else {
-                        resolve(User.fromUserInfo(body));
-                    }
-                });
-        });
+        return axios.get(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`)
+            .then(response => {
+                if(response.status != 200) throw new ErrorModel(
+                    ErrorCode.Authorization, 'response.statusCode=' + response.statusCode + ', body=' + response.data);
+                
+                return User.fromUserInfo(response.data);
+            });
     }
 
     /**
      * Sends the payload data to a device with GCM registration token.
      */
     public sendGcmMessage(data: IMessage, gcmToken: string): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            let postData: string = JSON.stringify(
-                {
+        return axios(
+            {
+                method: 'post',
+                url: 'https://gcm-http.googleapis.com/gcm/send',
+                headers: {
+                    'Authorization': 'key=' + this.apiKey,
+                    'Content-Type': 'application/json'
+                },
+                data: {
                     data: data,
                     to: gcmToken
-                });
-
-            let options: https.RequestOptions = {
-                method: 'POST',
-                host: 'gcm-http.googleapis.com',
-                path: '/gcm/send',
-                headers: {
-                    Authorization: 'key=' + this.apiKey,
-                    'Content-Type': 'application/json', 
-                    'Content-Length': postData.length
                 }
-            };
-            let googleReq = https.request(options, (resp) => {
-                if(resp.statusCode === 200) {
-                    console.log('GCM message sent: ' + data);
-                    resolve();
-                } else {
-                    console.log('GCM message failed: statusCode=' + resp.statusCode);
-                    reject();
-                }
+            })
+            .then(response => {
+                if(response.status != 200) throw new ErrorModel(ErrorCode.Unknown,
+                    `GCM message could not be sent. status=${response.status}, body=${response.data}`);
+            })
+            .catch(error => {
+                throw error;
             });
-            googleReq.write(postData);
-            googleReq.end();
-        });
     }
 }
 
