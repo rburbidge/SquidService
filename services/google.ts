@@ -15,31 +15,13 @@ export class Google {
     constructor(private readonly apiKey: string, private readonly clientIds: Array<string>) { }
 
     /**
-     * Checks if a Google token is valid.
-     * 
-     * If the token is an access token, then this will return true because an access token contains no user data.
-     * If the token is an ID token, then this will return the user info contained within.
+     * Gets ID token info.
+     * @param token The ID token.
      */
-    public getTokenInfo(tokenType: string, token: string): Promise<User> {
-        return axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?${tokenType}=${token}`)
-            .then(response => {
-                const body: IGoogleIdToken = response.data;
-
-                // Verify that token client ID matches whitelist of client IDs
-                if(!this.clientIds) throw new ErrorModel(ErrorCode.ServiceConfig, 'Google clientIds is null');                
-                if(this.clientIds.indexOf(body.aud) == -1) throw new ErrorModel(
-                    ErrorCode.Authorization, 'Google token had invalid client ID in aud field:' + body.aud);
-
-                switch(tokenType) {
-                    case TokenType.Id: return User.fromIdToken(body);
-
-                    // In access token case, we need to get user information from another API first, so we don't have
-                    // a full user object yet. Return true to indicate that auth succeeded
-                    case TokenType.Access: return true;
-
-                    // Uknown token types
-                    default: throw new ErrorModel(ErrorCode.BadRequest, `Unknown tokenType=${tokenType}`);
-                }
+    public getIdTokenUser(token: string): Promise<User> {
+        return this.getTokenInfoImpl(TokenType.Id, token)
+            .then((body: IGoogleIdToken) => {
+                return User.fromIdToken(body);
             })
             .catch((error) => {
                 throw new ErrorModel(ErrorCode.Authorization, 'Error validating Google token: ' + JSON.stringify(error));
@@ -47,18 +29,16 @@ export class Google {
     }
 
     /**
-     * Retrieves the user info for an access token.
-     * 
-     * Required because access tokens do not contain the user info, such as the user's unique ID.
-     * @param accessToken The access token.
+     * Gets access token info.
+     * @param token The access token.
      */
-    public static getUserInfo(accessToken: string): Promise<User> {
-        return axios.get(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`)
-            .then(response => {
-                if(response.status != 200) throw new ErrorModel(
-                    ErrorCode.Authorization, 'response.statusCode=' + response.statusCode + ', body=' + response.data);
-                
-                return User.fromUserInfo(response.data);
+    public getAccessTokenUser(token: string): Promise<User> {
+        return this.getTokenInfoImpl(TokenType.Access, token)
+            .then(() => {
+                return Google.getUserInfo(token);
+            })
+            .catch((error) => {
+                throw new ErrorModel(ErrorCode.Authorization, 'Error validating Google token: ' + JSON.stringify(error));
             });
     }
 
@@ -87,15 +67,58 @@ export class Google {
                 throw error;
             });
     }
+
+    /**
+     * Get token info for any token type.
+     * * In the case of ID tokens, this returns IGoogleIdToken.
+     * * In the case if access tokens, we don't care about the return type because we still need to call
+     *   Google.getUserInfo() to get the unique user ID.
+     * @param tokenType One of the TokenType values.
+     * @param token The token.
+     */
+    private getTokenInfoImpl(tokenType: string, token: string): Promise<any> {
+        return axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?${tokenType}=${token}`)
+            .then(response => {
+                const body: IGoogleToken = response.data;
+
+                // Verify that token client ID matches whitelist of client IDs
+                if(!this.clientIds) throw new ErrorModel(ErrorCode.ServiceConfig, 'Google clientIds is null');                
+                if(this.clientIds.indexOf(body.aud) == -1) throw new ErrorModel(
+                    ErrorCode.Authorization, 'Google token had invalid client ID in aud field:' + body.aud);
+
+                return body;
+            })
+            .catch((error) => {
+                throw new ErrorModel(ErrorCode.Authorization, 'Error validating Google token: ' + JSON.stringify(error));
+            });
+    }
+
+    /**
+     * Retrieves the user info for an access token.
+     * 
+     * Required because access tokens do not contain the user info, such as the user's unique ID.
+     * @param accessToken The access token.
+     */
+    private static getUserInfo(accessToken: string): Promise<User> {
+        return axios.get(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`)
+            .then(response => {
+                if(response.status != 200) throw new ErrorModel(
+                    ErrorCode.Authorization, 'response.statusCode=' + response.statusCode + ', body=' + response.data);
+                
+                return User.fromUserInfo(response.data);
+            });
+    }
+}
+
+interface IGoogleToken {
+    /** The token's Google client ID. */
+    aud: string;
 }
 
 /**
  * TODO Get URL for dev guide for this API.
  */
-export interface IGoogleIdToken {
-    /** The token's Google client ID. */
-    aud: string;
-
+export interface IGoogleIdToken extends IGoogleToken {
     /** The user name. */
     name?: string;
 
