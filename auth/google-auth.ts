@@ -1,3 +1,4 @@
+import { ErrorModel, ErrorCode } from '../models/error-model';
 import { Google } from '../services/google';
 import { GoogleAuthHelper } from './google-auth-helper';
 import { AuthToken } from './auth-token';
@@ -26,30 +27,14 @@ class GoogleAuth {
         const parsedAuthHeader = GoogleAuth.parseAuthHeader(req);
         console.log(`Google ${parsedAuthHeader.tokenType} received. Validating...`);
 
-        return this.google.getTokenInfo(parsedAuthHeader.tokenType, parsedAuthHeader.token)
-            // 1. Get the token info for either access token or ID token
-            //    If this succeeds, then we have AuthZ
-            .then((tokenInfo) => {
-                if(!tokenInfo) {
-                    console.error('AuthZ failed. Unable to obtain identity');
-                    throw new Error('Authorization did not return a user');
-                }
-
-                console.log('Token is valid');
-                return tokenInfo;
-            })
-            // 2. Get the User identity
-            //    If ID token, then we already have the User object -- return it
-            //    If access token, then we need to call getUserInfo to get the user
-            .then((user) => {
-                switch(parsedAuthHeader.tokenType) {
-                    case TokenType.Id:
-                        return Promise.resolve(user);
-                    case TokenType.Access:
-                        console.log('Getting user info for access_token');
-                        return Google.getUserInfo(parsedAuthHeader.token);
-                }
-            });
+        switch(parsedAuthHeader.tokenType) {
+            case TokenType.Access:
+                return this.google.getAccessTokenUser(parsedAuthHeader.token);
+            case TokenType.Id:
+                return this.google.getIdTokenUser(parsedAuthHeader.token);
+            default:
+                throw new ErrorModel(ErrorCode.Authorization, 'Unknown Google auth token received');
+        }
     }
  
     /**
