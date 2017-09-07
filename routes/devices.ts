@@ -3,6 +3,7 @@ import { Device } from '../data/models/device';
 import { Devices } from '../data/devices';
 import { DeviceModel } from '../models/device';
 import { ErrorModel, ErrorCode } from '../models/error-model';
+import { ErrorHelper } from './error-helper';
 import { Google, MessageType } from '../services/google';
 import { googleAuth } from '../auth/google-auth';
 import { User } from '../data/models/user';
@@ -69,20 +70,11 @@ export class DevicesRouter {
         this.devicesDb.addDevice(req.user.id, req.body.name, req.body.gcmToken)
             .then(addDeviceResult => {
                 res.status(addDeviceResult.added ? 200 : 302)
-                    .send(new DeviceModel(addDeviceResult.device));
+                   .send(new DeviceModel(addDeviceResult.device));
             })
-            .catch((error) => {
-                console.log(`Add device failed: ${error}`);
-
-                let httpStatus: number;
-                if(error instanceof ErrorModel) {
-                    httpStatus = error.code == ErrorCode.BadRequest ? 400 : 500;
-                } else {
-                    httpStatus = 500;
-                    error = new ErrorModel(ErrorCode.Unknown, 'Device could not be added')
-                }
-
-                res.status(httpStatus).send(error);
+            .catch((error: any) => {
+                console.error(`Add device failed: ${error}`);
+                ErrorHelper.send(res, error);
             });
     }
 
@@ -102,7 +94,7 @@ export class DevicesRouter {
             })
             .catch(() => {
                 console.log('User does not exist');
-                res.status(404).send();
+                ErrorHelper.send(res, ErrorModel.fromErrorCode(ErrorCode.UserNotFound));;
             });
     }
 
@@ -117,7 +109,7 @@ export class DevicesRouter {
             .then(user => {
                 let device: Device = user.devices.filter(d => d.id === req.params.deviceId)[0];
                 if(!device) {
-                    res.status(404).send('Device does not exist');
+                    ErrorHelper.send(res, ErrorModel.fromErrorCode(ErrorCode.UserNotFound));
                     return;
                 }
 
@@ -130,13 +122,12 @@ export class DevicesRouter {
                     .then(() => {
                         res.status(200).end();
                     })
-                    .catch(() => {
-                        res.status(500).end();
+                    .catch(error => {
+                        ErrorHelper.send(res, error);
                     });
             })
-            .catch(error => {
-                res.status(404).send('User does not exist');
-                return;
+            .catch(() => {
+                ErrorHelper.send(res, ErrorModel.fromErrorCode(ErrorCode.UserNotFound));
             });
     }
 
