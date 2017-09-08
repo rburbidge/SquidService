@@ -1,4 +1,5 @@
-import { ErrorModel, ErrorCode } from '../models/error-model'
+import { ErrorModel } from '../models/error-model'
+import { ErrorCode } from '../exposed/error-model';
 import { User } from '../auth/user';
 import { TokenType } from '../auth/token-type';
 

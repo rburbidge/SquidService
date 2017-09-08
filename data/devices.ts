@@ -1,5 +1,5 @@
-
-import { ErrorModel, ErrorCode } from '../models/error-model';
+import { ErrorModel } from '../models/error-model';
+import { ErrorCode } from '../exposed/error-model';
 import { Device } from './models/device';
 import { User } from './models/user';
 import * as mongodb from 'mongodb';
