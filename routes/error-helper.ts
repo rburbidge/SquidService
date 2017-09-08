@@ -1,11 +1,16 @@
-import { ErrorModel, ErrorCode } from '../models/error-model';
+import { ErrorModel } from '../models/error-model';
+import { ErrorCode } from '../exposed/error-model';
 import * as express from 'express';
 
+/**
+ * Helpers for sending ErrorModels in Express HTTP responses.
+ */
 export class ErrorHelper {
     /**
-     * Sends an error response. If the error is any, then a generic 500 error with ErrorCode.Unknown will be sent.
+     * Sends an error response. If the error is any, then a generic 500 error model with ErrorCode.Unknown will be sent.
      * @param res The response to send.
      * @param error The error to send.
+     * @see ErrorModel
      */
     public static send(res: express.Response, error: any | ErrorModel): void {
         let errorModel: ErrorModel;        

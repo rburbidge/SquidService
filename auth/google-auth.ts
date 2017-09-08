@@ -1,4 +1,5 @@
-import { ErrorModel, ErrorCode } from '../models/error-model';
+import { ErrorModel } from '../models/error-model';
+import { ErrorCode } from '../exposed/error-model';
 import { Google } from '../services/google';
 import { GoogleAuthHelper } from './google-auth-helper';
 import { AuthToken } from './auth-token';
