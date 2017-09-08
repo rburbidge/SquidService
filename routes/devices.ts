@@ -3,6 +3,7 @@ import { Device } from '../data/models/device';
 import { Devices } from '../data/devices';
 import { DeviceModel } from '../models/device';
 import { ErrorModel, ErrorCode } from '../models/error-model';
+import { ErrorHelper } from './error-helper';
 import { Google, MessageType } from '../services/google';
 import { googleAuth } from '../auth/google-auth';
 import { User } from '../data/models/user';
@@ -66,22 +67,14 @@ export class DevicesRouter {
             req.checkBody('gcmToken', 'Must pass gcmToken').notEmpty();
         })
     private addDevice(req: tex.IBody<IAddDeviceBody>, res: express.Response): void {
-        // Create the device/user if one with the same GCM token does not exist
-        this.devicesDb.getDevice(req.user.id, req.body.gcmToken)
-            .then(device => {
-                if(device) {
-                    return Promise.resolve({ device: device, added: false});
-                }
-                return this.devicesDb.addDevice(req.user.id, req.body.name, req.body.gcmToken)
-                    .then(device => { return { device: device, added: true }});
-            })
+        this.devicesDb.addDevice(req.user.id, req.body.name, req.body.gcmToken)
             .then(addDeviceResult => {
                 res.status(addDeviceResult.added ? 200 : 302)
                    .send(new DeviceModel(addDeviceResult.device));
             })
-            .catch((error) => {
-                console.log('Add device failed: ' + error);
-                res.status(500).send(new ErrorModel(ErrorCode.Unknown, 'Device could not be added'));
+            .catch((error: any) => {
+                console.error(`Add device failed: ${error}`);
+                ErrorHelper.send(res, error);
             });
     }
 
@@ -101,7 +94,7 @@ export class DevicesRouter {
             })
             .catch(() => {
                 console.log('User does not exist');
-                res.status(404).send();
+                ErrorHelper.send(res, ErrorModel.fromErrorCode(ErrorCode.UserNotFound));;
             });
     }
 
@@ -116,7 +109,7 @@ export class DevicesRouter {
             .then(user => {
                 let device: Device = user.devices.filter(d => d.id === req.params.deviceId)[0];
                 if(!device) {
-                    res.status(404).send('Device does not exist');
+                    ErrorHelper.send(res, ErrorModel.fromErrorCode(ErrorCode.UserNotFound));
                     return;
                 }
 
@@ -129,13 +122,12 @@ export class DevicesRouter {
                     .then(() => {
                         res.status(200).end();
                     })
-                    .catch(() => {
-                        res.status(500).end();
+                    .catch(error => {
+                        ErrorHelper.send(res, error);
                     });
             })
-            .catch(error => {
-                res.status(404).send('User does not exist');
-                return;
+            .catch(() => {
+                ErrorHelper.send(res, ErrorModel.fromErrorCode(ErrorCode.UserNotFound));
             });
     }
 
