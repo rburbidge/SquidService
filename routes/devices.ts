@@ -1,7 +1,7 @@
 import { Validate } from '../core/validate';
 import { Device } from '../data/models/device';
 import { Devices } from '../data/devices';
-import { DeviceModel } from '../models/device';
+import { DeviceModel } from '../exposed/device-model';
 import { ErrorModel } from '../models/error-model';
 import { ErrorCode } from '../exposed/error-model';
 import { ErrorHelper } from './error-helper';
@@ -50,7 +50,7 @@ export class DevicesRouter {
     private getDevices(req: tex.IAuthed, res: express.Response): void {
         this.devicesDb.getUser(req.user.id)
             .then((user: User) => {
-                let deviceModels: DeviceModel[] = user.devices.map((value: Device) => new DeviceModel(value));
+                let deviceModels: DeviceModel[] = user.devices.map((value: Device) => DevicesRouter.convert(value));
                 res.status(200).send(deviceModels);    
             })
             .catch((error) => {
@@ -71,7 +71,7 @@ export class DevicesRouter {
         this.devicesDb.addDevice(req.user.id, req.body.name, req.body.gcmToken)
             .then(addDeviceResult => {
                 res.status(addDeviceResult.added ? 200 : 302)
-                   .send(new DeviceModel(addDeviceResult.device));
+                   .send(DevicesRouter.convert(addDeviceResult.device));
             })
             .catch((error: any) => {
                 console.error(`Add device failed: ${error}`);
@@ -135,6 +135,14 @@ export class DevicesRouter {
     /** Validates that there is a non-empty device ID URL parameter. */
     private static validateDeviceId(req: express.Request) {
         req.check('deviceId', 'Must pass deviceId').notEmpty();
+    }
+
+    /** Converts a Device to DeviceModel. */
+    private static convert(device: Device): DeviceModel {
+        return {
+            id: device.id,
+            name: device.name
+        };
     }
 }
 
