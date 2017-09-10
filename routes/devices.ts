@@ -104,7 +104,7 @@ export class DevicesRouter {
      * Returns 404 if the user does not exist.
      */
     @Validate(DevicesRouter.validateDeviceId)
-    private command(req: tex.IUrlParams<DeviceUrlParams> & tex.IBody<CommandBody>, res: express.Response): void {
+    private command(req: tex.IBodyAndUrlParams<CommandBody, DeviceUrlParams>, res: express.Response): void {
         this.devicesDb.getUser(req.user.id)
             .then(user => {
                 let device: Device = user.devices.filter(d => d.id === req.params.deviceId)[0];
