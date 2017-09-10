@@ -1,3 +1,25 @@
+export interface AddDeviceBody {
+    /** The device name. */
+    name: string;
+
+    /** The device GCM token. */
+    gcmToken: string;
+}
+
+export interface CommandBody {
+    /** The URL to send to the device. */
+    url: string
+}
+
+/** Device returned by SquidService. */
+export interface DeviceModel {
+    /** The device unique ID, defined by SquidService. */
+    readonly id: string;
+
+    /** The device name displayable in the UI. e.g. "Nexus 5". */
+    readonly name: string;
+}
+
 /** Error info returned by SquidService. */
 export interface ErrorModel {
     /** The error code. */

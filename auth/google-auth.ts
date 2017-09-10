@@ -1,5 +1,5 @@
 import { ErrorModel } from '../models/error-model';
-import { ErrorCode } from '../exposed/error-model';
+import { ErrorCode } from '../exposed/squid';
 import { Google } from '../services/google';
 import { GoogleAuthHelper } from './google-auth-helper';
 import { AuthToken } from './auth-token';
