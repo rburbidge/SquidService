@@ -1,5 +1,5 @@
 import { ErrorModel } from '../models/error-model';
-import { ErrorCode } from '../exposed/error-model';
+import { ErrorCode } from '../exposed/squid';
 import * as express from 'express';
 
 /**

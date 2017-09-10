@@ -1,13 +1,12 @@
-import { Validate } from '../core/validate';
+import { AddDeviceBody, CommandBody, DeviceModel, ErrorCode } from '../exposed/squid';
 import { Device } from '../data/models/device';
 import { Devices } from '../data/devices';
-import { DeviceModel } from '../exposed/device-model';
 import { ErrorModel } from '../models/error-model';
-import { ErrorCode } from '../exposed/error-model';
 import { ErrorHelper } from './error-helper';
 import { Google, MessageType } from '../services/google';
 import { googleAuth } from '../auth/google-auth';
 import { User } from '../data/models/user';
+import { Validate } from '../core/validate';
 import * as https from 'https';
 import * as express from 'express';
 import * as tex from '../core/typed-express';
@@ -67,7 +66,7 @@ export class DevicesRouter {
             req.checkBody('name', 'Must pass name').notEmpty();
             req.checkBody('gcmToken', 'Must pass gcmToken').notEmpty();
         })
-    private addDevice(req: tex.IBody<IAddDeviceBody>, res: express.Response): void {
+    private addDevice(req: tex.IBody<AddDeviceBody>, res: express.Response): void {
         this.devicesDb.addDevice(req.user.id, req.body.name, req.body.gcmToken)
             .then(addDeviceResult => {
                 res.status(addDeviceResult.added ? 200 : 302)
@@ -105,7 +104,7 @@ export class DevicesRouter {
      * Returns 404 if the user does not exist.
      */
     @Validate(DevicesRouter.validateDeviceId)
-    private command(req: tex.IUrlParams<IDeviceUrlParams>, res: express.Response): void {
+    private command(req: tex.IUrlParams<DeviceUrlParams> & tex.IBody<CommandBody>, res: express.Response): void {
         this.devicesDb.getUser(req.user.id)
             .then(user => {
                 let device: Device = user.devices.filter(d => d.id === req.params.deviceId)[0];
@@ -146,17 +145,9 @@ export class DevicesRouter {
     }
 }
 
-interface IDeviceUrlParams {
+interface DeviceUrlParams {
     /** The device ID. */
     deviceId: string
-}
-
-interface IAddDeviceBody {
-    /** The device name. */
-    name: string;
-
-    /** The device GCM token. */
-    gcmToken: string;
 }
 
 /**

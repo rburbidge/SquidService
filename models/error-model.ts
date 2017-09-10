@@ -1,4 +1,4 @@
-import { ErrorModel as IErrorModel, ErrorCode } from '../exposed/error-model';
+import { ErrorModel as IErrorModel, ErrorCode } from '../exposed/squid';
 
 export class ErrorModel implements IErrorModel {
     /**
