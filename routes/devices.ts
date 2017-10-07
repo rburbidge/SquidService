@@ -65,9 +65,10 @@ export class DevicesRouter {
         {
             req.checkBody('name', 'Must pass name').notEmpty();
             req.checkBody('gcmToken', 'Must pass gcmToken').notEmpty();
+            req.checkBody('deviceType', 'Must pass type').notEmpty();
         })
     private addDevice(req: tex.IBody<AddDeviceBody>, res: express.Response): void {
-        this.devicesDb.addDevice(req.user.id, req.body.name, req.body.gcmToken)
+        this.devicesDb.addDevice(req.user.id, req.body)
             .then(addDeviceResult => {
                 res.status(addDeviceResult.added ? 200 : 302)
                    .send(DevicesRouter.convert(addDeviceResult.device));
@@ -140,7 +141,8 @@ export class DevicesRouter {
     private static convert(device: Device): DeviceModel {
         return {
             id: device.id,
-            name: device.name
+            name: device.name,
+            deviceType: device.deviceType
         };
     }
 }

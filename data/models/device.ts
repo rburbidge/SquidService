@@ -1,3 +1,5 @@
+import { DeviceType } from '../../exposed/squid';
+
 export interface Device {
     /* The device ID, defined by the server. */
     id: string;
@@ -7,4 +9,7 @@ export interface Device {
 
     /* The Google Cloud Messaging token, from the Android device. */
     gcmToken: string;
+
+    /* The device type. */
+    deviceType: DeviceType;
 }

@@ -1,5 +1,5 @@
 import { ErrorModel } from '../models/error-model';
-import { ErrorCode } from '../exposed/squid';
+import { AddDeviceBody, ErrorCode } from '../exposed/squid';
 import { Device } from './models/device';
 import { User } from './models/user';
 import * as mongodb from 'mongodb';
@@ -21,19 +21,18 @@ export class Devices {
      * Adds a device for a user. If the user doesn't exist, adds a new user with the device.
      * The device is assigned a unique ID: a randomly generated UUID.
      * @param userId The user ID.
-     * @param name The device name.
-     * @param gcmToken The device GCM token.
+     * @param deviceBody The device info.
      * @throws ErrorModel | any if an error occurs.
      */
-    public addDevice(userId: string, name: string, gcmToken: string): Promise<AddDeviceResult> {
+    public addDevice(userId: string, deviceBody: AddDeviceBody): Promise<AddDeviceResult> {
         return this.getUser(userId)
             .then(user => {
                 if(!user || !user.devices) return;
 
                 // Return existing device if one with the same GCM token already exists
-                const devicesWithGcmToken = user.devices.filter(device => device.gcmToken == gcmToken);
+                const devicesWithGcmToken = user.devices.filter(device => device.gcmToken == deviceBody.gcmToken);
                 if(devicesWithGcmToken.length > 0) {
-                    console.log(`A device with GCM token ${gcmToken} already exists`);
+                    console.log(`A device with GCM token ${deviceBody.gcmToken} already exists`);
                     return devicesWithGcmToken[0];
                 }
 
@@ -50,8 +49,9 @@ export class Devices {
 
                 const newDevice: Device = {
                     id: uuid.v4(),
-                    gcmToken: gcmToken,
-                    name: name
+                    gcmToken: deviceBody.gcmToken,
+                    name: deviceBody.name,
+                    deviceType: deviceBody.deviceType
                 };
                 return this.addDeviceToDb(userId, newDevice)
                     .then(device => {
