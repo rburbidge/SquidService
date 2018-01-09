@@ -1,9 +1,18 @@
+/** High level device type.  */
+export enum DeviceType {
+    android = "android",
+    chrome = "chrome"
+}
+
 export interface AddDeviceBody {
     /** The device name. */
     name: string;
 
     /** The device GCM token. */
     gcmToken: string;
+
+    /** The device type. */
+    deviceType: DeviceType;
 }
 
 export interface CommandBody {
@@ -14,28 +23,31 @@ export interface CommandBody {
 /** Device returned by SquidService. */
 export interface DeviceModel {
     /** The device unique ID, defined by SquidService. */
-    readonly id: string;
+    id: string;
 
     /** The device name displayable in the UI. e.g. "Nexus 5". */
-    readonly name: string;
+    name: string;
+
+    /** The device type. */
+    deviceType: DeviceType;
 }
 
 /** Error info returned by SquidService. */
 export interface ErrorModel {
     /** The error code. */
-    readonly code: ErrorCode;
+    code: ErrorCode;
 
     /**
      * A string representation of the error code. e.g. "UserNotFound"
      * @see code
      */
-    readonly codeString: string;
+    codeString: string;
 
     /** The error message. */
-    readonly message: string;
+    message: string;
 
     /** A generic error payload. */
-    readonly errorsInfo?: any;
+    errorsInfo?: any;
 }
 
 /**
