@@ -1,3 +1,5 @@
+[![Build Status](https://semaphoreci.com/api/v1/projects/e3ab9e81-83b4-4bd0-ae4e-b97e4ba471f4/1713794/badge.svg)](https://semaphoreci.com/rburbidge-squid/squidservice)
+
 # SquidService
 Squid is an app that allows a user to open web pages from Google Chrome on their Android devices. This service, built on node.js, drives device management and integrates with [Google Cloud Messaging](https://developers.google.com/cloud-messaging/) for push notifications.
 
