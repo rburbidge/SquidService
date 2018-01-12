@@ -85,7 +85,7 @@ export class DevicesRouter {
      * Returns 404 if the user or device does not exist.
      */
     @Validate(DevicesRouter.validateDeviceId)
-    private deleteDevice(req: tex.IAuthed, res: express.Response): void {
+    private deleteDevice(req: tex.IUrlParams<DeviceUrlParams>, res: express.Response): void {
         this.devicesDb.removeDevice(req.user.id, req.params.deviceId)
             .then((deleted: boolean) => {
                 console.log(deleted
