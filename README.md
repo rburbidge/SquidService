@@ -15,6 +15,7 @@ npm install -g typescript gulp
 * Build: ```tsc -w```
 * Run the server locally: ```npm start```
 * Clean: ```gulp clean```
+* Test: ```npm test```
 
 ## Visual Studio Code
 Launch configs can be imported from ```./launch.json```
@@ -25,21 +26,21 @@ SquidService uses https://www.npmjs.com/package/config, and requires a config fi
 #### Default
 This uses ```./config/default.json```, which as cloned from the repo is intentionally incomplete. Fill in ```server.database.url``` with your MongoDB connection string.
 ```
-node server.js
+npm start
 ```
 
 #### Production
 This uses ```./config/production.json```, which is intentionally missing from the repo.
 ```
 set NODE_ENV=production
-node server.js
+npm start
 ```
 
 #### Custom
 To make a custom "foo" configuration, e.g. ```./config/foo.json```.
 ```
 set NODE_ENV=foo
-node server.js
+npm start
 ```
 
 ## Deploying to Azure

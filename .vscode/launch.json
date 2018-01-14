@@ -11,7 +11,7 @@
             "env": {
                 "NODE_ENV": "production"
             },
-            "program": "${workspaceRoot}/server.js",
+            "program": "${workspaceRoot}/app.js",
             "outFiles": [
                 "${workspaceRoot}/out/**/*.js"
             ]

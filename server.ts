@@ -12,17 +12,20 @@ import * as mongodb from 'mongodb';
 const validator = require('express-validator');
 const config = require('config');
 
-// Start the server and log any errors that occur
-try {
-    startServer()
-        .catch(error => {
-            console.log(`ERROR: Server could not be started: ${error}`);
-        });
-} catch(error) {
-    console.log(`ERROR: Server could not be started: ${error}`);
+export function createServer(): Promise<express.Application> {
+    // Start the server and log any errors that occur
+    try {
+        return startServer()
+            .catch(error => {
+                console.log(`ERROR: Server could not be started: ${error}`);
+                return null;
+            });
+    } catch(error) {
+        console.log(`ERROR: Server could not be started: ${error}`);
+    }
 }
 
-function startServer(): Promise<void> {
+function startServer(): Promise<express.Application> {
     // Configuration is retrieved from <process.env.NODE_ENV>.json, so make sure that this is defined before proceeding
     if(!process.env.NODE_ENV) throw 'Environment variable NODE_ENV is undefined. You must define this as a string';
     const configFileName = `${process.env.NODE_ENV}.json`;
@@ -40,14 +43,14 @@ function startServer(): Promise<void> {
     return mongoClient.connect(serverConfig.database.url)
         .then((db: mongodb.Db) => {
             console.log('Connected to MongoDB');
-            onDbConnected(db, serverConfig);
+            return onDbConnected(db, serverConfig);
         })
         .catch(error => {
             throw 'Error while connecting to MongoDB: ' + error;
         });
 }
 
-function onDbConnected(db: mongodb.Db, serverConfig: Config) {
+function onDbConnected(db: mongodb.Db, serverConfig: Config): express.Application {
     // Create dependencies
     const devicesDb: mongodb.Collection = db.collection('userDevices');
     const devices: Devices = new Devices(devicesDb);
@@ -66,4 +69,6 @@ function onDbConnected(db: mongodb.Db, serverConfig: Config) {
     const port: number = process.env.PORT || serverConfig.defaultPort;
     app.listen(port);
     console.log('Server listening on port ' + port);
+
+    return app;
 }
