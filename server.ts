@@ -14,12 +14,15 @@ const config = require('config');
 
 // Start the server and log any errors that occur
 try {
-    startServer();
+    startServer()
+        .catch(error => {
+            console.log(`ERROR: Server could not be started: ${error}`);
+        });
 } catch(error) {
     console.log(`ERROR: Server could not be started: ${error}`);
 }
 
-function startServer() {
+function startServer(): Promise<void> {
     // Configuration is retrieved from <process.env.NODE_ENV>.json, so make sure that this is defined before proceeding
     if(!process.env.NODE_ENV) throw 'Environment variable NODE_ENV is undefined. You must define this as a string';
     const configFileName = `${process.env.NODE_ENV}.json`;
@@ -34,14 +37,14 @@ function startServer() {
 
     // Connect to the database and start the server
     const mongoClient: mongodb.MongoClient = mongodb.MongoClient;
-    mongoClient.connect(serverConfig.database.url, (err, db) => {
-        if(err) {
-            console.log('Error while connecting to MongoDB: ' + err);
-        } else {
+    return mongoClient.connect(serverConfig.database.url)
+        .then((db: mongodb.Db) => {
             console.log('Connected to MongoDB');
             onDbConnected(db, serverConfig);
-        }
-    });
+        })
+        .catch(error => {
+            throw 'Error while connecting to MongoDB: ' + error;
+        });
 }
 
 function onDbConnected(db: mongodb.Db, serverConfig: Config) {
