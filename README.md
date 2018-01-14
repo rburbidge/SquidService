@@ -15,7 +15,7 @@ npm install -g typescript gulp
 * Build: ```tsc -w```
 * Run the server locally: ```npm start```
 * Clean: ```gulp clean```
-* Test: ```npm test```
+* Test: ```set NODE_ENV=test``` followed by ```npm test```
 
 ## Visual Studio Code
 Launch configs can be imported from ```./launch.json```
