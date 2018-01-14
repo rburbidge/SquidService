@@ -11,10 +11,28 @@
             "env": {
                 "NODE_ENV": "production"
             },
-            "program": "${workspaceRoot}\\server.js",
+            "program": "${workspaceRoot}/server.js",
             "outFiles": [
                 "${workspaceRoot}/out/**/*.js"
             ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Mocha Tests",
+            "env": {
+                "NODE_ENV": "production"
+            },
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "-u",
+                "tdd",
+                "--timeout",
+                "999999",
+                "--colors",
+                "${workspaceRoot}/test"
+            ],
+            "internalConsoleOptions": "openOnSessionStart"
         }
     ]
 }

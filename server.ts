@@ -1,4 +1,4 @@
-import { Config}  from './config/config';
+import { Config, validateConfig }  from './config/config';
 import { Devices } from './data/devices';
 import { Google } from './services/google'
 import { devicesRouter } from './routes/devices';
@@ -12,19 +12,39 @@ import * as mongodb from 'mongodb';
 const validator = require('express-validator');
 const config = require('config');
 
-const serverConfig = config.get('server') as Config;
+// Start the server and log any errors that occur
+try {
+    startServer();
+} catch(error) {
+    console.log(`ERROR: Server could not be started: ${error}`);
+}
 
-const mongoClient: mongodb.MongoClient = mongodb.MongoClient;
-mongoClient.connect(serverConfig.database.url, (err, db) => {
-    if(err) {
-        console.log('Error while connecting to MongoDB: ' + err);
-    } else {
-        console.log('Connected to MongoDB');
-        onDbConnected(db);
+function startServer() {
+    // Configuration is retrieved from <process.env.NODE_ENV>.json, so make sure that this is defined before proceeding
+    if(!process.env.NODE_ENV) throw 'Environment variable NODE_ENV is undefined. You must define this as a string';
+    const configFileName = `${process.env.NODE_ENV}.json`;
+
+    // Retrieve and validate the config
+    const serverConfig = config.get('server') as Config;
+    try {
+        validateConfig(serverConfig);
+    } catch(error) {
+        throw `${configFileName} validation failed.\n\nERROR: ${error}.\n\nDid you fill in your config AND set the NODE_ENV environment variable?`
     }
-});
 
-function onDbConnected(db: mongodb.Db) {
+    // Connect to the database and start the server
+    const mongoClient: mongodb.MongoClient = mongodb.MongoClient;
+    mongoClient.connect(serverConfig.database.url, (err, db) => {
+        if(err) {
+            console.log('Error while connecting to MongoDB: ' + err);
+        } else {
+            console.log('Connected to MongoDB');
+            onDbConnected(db, serverConfig);
+        }
+    });
+}
+
+function onDbConnected(db: mongodb.Db, serverConfig: Config) {
     // Create dependencies
     const devicesDb: mongodb.Collection = db.collection('userDevices');
     const devices: Devices = new Devices(devicesDb);
