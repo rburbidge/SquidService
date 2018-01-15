@@ -2,8 +2,7 @@ import { createServer } from '../server';
 
 import * as express from 'express';
 import * as http from 'http';
-
-const request = require('supertest');
+import * as request from 'supertest';
     
 describe('index', () => {
     let app: http.Server;
