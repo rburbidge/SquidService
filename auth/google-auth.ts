@@ -25,17 +25,20 @@ class GoogleAuth {
      * @returns a user if the request has AuthZ, and throws otherwise.
      */
     public authenticate(req: express.Request): Promise<User> {
-        const parsedAuthHeader = GoogleAuth.parseAuthHeader(req);
-        console.log(`Google ${parsedAuthHeader.tokenType} received. Validating...`);
+        return Promise.resolve(null)
+            .then(result =>  GoogleAuth.parseAuthHeader(req))
+            .then(parsedAuthHeader => {
+                console.log(`Google ${parsedAuthHeader.tokenType} received. Validating...`);
 
-        switch(parsedAuthHeader.tokenType) {
-            case TokenType.Access:
-                return this.google.getAccessTokenUser(parsedAuthHeader.token);
-            case TokenType.Id:
-                return this.google.getIdTokenUser(parsedAuthHeader.token);
-            default:
-                throw new ErrorModel(ErrorCode.Authorization, 'Unknown Google auth token received');
-        }
+                switch(parsedAuthHeader.tokenType) {
+                    case TokenType.Access:
+                        return this.google.getAccessTokenUser(parsedAuthHeader.token);
+                    case TokenType.Id:
+                        return this.google.getIdTokenUser(parsedAuthHeader.token);
+                    default:
+                        throw new ErrorModel(ErrorCode.Authorization, 'Unknown Google auth token received');
+                }
+            });
     }
  
     /**
@@ -46,14 +49,14 @@ class GoogleAuth {
         let authHeader: string = req.get('Authorization');
         if(!authHeader) {
             console.error('AuthZ failed. No token was found');
-            throw new Error('Authorization header must be sent with Google token');
+            throw new ErrorModel(ErrorCode.Authorization, 'Authorization header must be sent with Google token');
         }
 
         // The auth header has a "<prefix> <token>" format. Parse the token for out for validation. If this fails, bomb out
         let parsedAuth: AuthToken = GoogleAuthHelper.parseAuthToken(authHeader);
         if(!parsedAuth) {
-            console.error(`AuthZ failed. token or tokenType could not be parsed ${authHeader}`);
-            throw new Error('Unable to parse Authorization header token');
+            console.error(`AuthZ failed. token or tokenType could not be parsed. Authentication header: ${authHeader}`);
+            throw new ErrorModel(ErrorCode.Authorization, 'Unable to parse Authorization header token');
         }
 
         return parsedAuth;
@@ -70,13 +73,13 @@ export function googleAuth(google: Google): express.RequestHandler {
 
     return (req: tex.IAuthed, res: express.Response, next: express.NextFunction) => {
         googleAuth.authenticate(req)
-        .then((user: User) => {
-            req.user = user;
-            console.log('User is authZd');
-            next();
-        })
-        .catch((error: any) => {
-            res.status(401).send(error);
-        })
+            .then((user: User) => {
+                req.user = user;
+                console.log('User is authZd');
+                next();
+            })
+            .catch((error: any) => {
+                res.status(401).send(error);
+            });
     }
 }

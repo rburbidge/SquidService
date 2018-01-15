@@ -1,0 +1,13 @@
+{
+    "server": {
+        "googleApiKey": "FAKE API KEY",
+        "googleValidClientIds": [
+            "FAKE CLIENT ID 1",
+            "FAKE CLIENT ID 2"
+        ],
+        // TODO Move tests to in-memory DB
+        "database": {
+            "url": "mongodb://rburbidge:GucUi3yErFIXwZt6@squid-shard-00-00-zqv5m.mongodb.net:27017,squid-shard-00-01-zqv5m.mongodb.net:27017,squid-shard-00-02-zqv5m.mongodb.net:27017/prod?ssl=true&replicaSet=Squid-shard-0&authSource=admin"
+        }
+    }
+}

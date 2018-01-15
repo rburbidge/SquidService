@@ -25,7 +25,8 @@ export class Google {
                 return User.fromIdToken(body);
             })
             .catch((error) => {
-                throw new ErrorModel(ErrorCode.Authorization, 'Error validating Google token: ' + JSON.stringify(error));
+                console.warn('Error validating Google ID token: ' + error);
+                throw new ErrorModel(ErrorCode.Authorization, 'Error validating Google ID token');
             });
     }
 
@@ -39,7 +40,8 @@ export class Google {
                 return Google.getUserInfo(token);
             })
             .catch((error) => {
-                throw new ErrorModel(ErrorCode.Authorization, 'Error validating Google token: ' + JSON.stringify(error));
+                console.warn('Error validating Google access token: ' + error)
+                throw new ErrorModel(ErrorCode.Authorization, 'Error validating Google access token');
             });
     }
 
@@ -84,13 +86,12 @@ export class Google {
 
                 // Verify that token client ID matches whitelist of client IDs
                 if(!this.clientIds) throw new ErrorModel(ErrorCode.ServiceConfig, 'Google clientIds is null');                
-                if(this.clientIds.indexOf(body.aud) == -1) throw new ErrorModel(
-                    ErrorCode.Authorization, 'Google token had invalid client ID in aud field:' + body.aud);
+                if(this.clientIds.indexOf(body.aud) == -1) throw 'Google token had invalid client ID in aud field:' + body.aud;
 
                 return body;
             })
             .catch((error) => {
-                throw new ErrorModel(ErrorCode.Authorization, 'Error validating Google token: ' + JSON.stringify(error));
+                throw `Get tokeninfo returned Status=${error.response.status}, Body=${JSON.stringify(error.response.data)}`;
             });
     }
 

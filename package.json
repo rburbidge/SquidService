@@ -2,7 +2,7 @@
   "name": "sirnommington",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "app.js",
   "dependencies": {
     "axios": "^0.16.2",
     "body-parser": "^1.15.0",
@@ -12,27 +12,30 @@
     "mocha": "^3.0.2",
     "mongodb": "^2.2.30",
     "request-validator": "^0.3.3",
-    "supertest": "^2.0.0",
     "typescript": "^2.1.5",
     "uuid": "^2.0.2"
   },
   "devDependencies": {
+    "@types/assert": "0.0.31",
     "@types/body-parser": "0.0.33",
     "@types/es6-promise": "0.0.32",
     "@types/express-validator": "^2.20.33",
+    "@types/mocha": "^2.2.46",
     "@types/mongodb": "^2.1.40",
     "@types/node": "^7.0.4",
+    "assert": "^1.4.1",
     "gulp": "^3.9.1",
     "gulp-git": "^1.14.0",
     "gulp-typescript": "^3.1.4",
     "gulp-util": "^3.0.8",
     "node-inspector": "^0.12.8",
+    "supertest": "^2.0.0",
     "vinyl-ftp": "^0.6.0",
     "yargs": "^6.6.0"
   },
   "scripts": {
     "test": "mocha",
-    "start": "node server.js"
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
