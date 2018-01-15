@@ -7,12 +7,13 @@ import { logger } from './logging/request-logger';
 
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
+import * as http from 'http';
 import * as mongodb from 'mongodb';
 
 const validator = require('express-validator');
 const config = require('config');
 
-export function createServer(): Promise<express.Application> {
+export function createServer(): Promise<http.Server> {
     // Start the server and log any errors that occur
     try {
         return startServer()
@@ -25,7 +26,7 @@ export function createServer(): Promise<express.Application> {
     }
 }
 
-function startServer(): Promise<express.Application> {
+function startServer(): Promise<http.Server> {
     // Configuration is retrieved from <process.env.NODE_ENV>.json, so make sure that this is defined before proceeding
     if(!process.env.NODE_ENV) throw 'Environment variable NODE_ENV is undefined. You must define this as a string';
     const configFileName = `${process.env.NODE_ENV}.json`;
@@ -50,7 +51,7 @@ function startServer(): Promise<express.Application> {
         });
 }
 
-function onDbConnected(db: mongodb.Db, serverConfig: Config): express.Application {
+function onDbConnected(db: mongodb.Db, serverConfig: Config): http.Server {
     // Create dependencies
     const devicesDb: mongodb.Collection = db.collection('userDevices');
     const devices: Devices = new Devices(devicesDb);
@@ -67,8 +68,7 @@ function onDbConnected(db: mongodb.Db, serverConfig: Config): express.Applicatio
     app.use('/api/devices', devicesRouter(devices, google));
 
     const port: number = process.env.PORT || serverConfig.defaultPort;
-    app.listen(port);
     console.log('Server listening on port ' + port);
 
-    return app;
+    return app.listen(port);
 }

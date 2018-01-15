@@ -3,7 +3,7 @@ var assert = require('assert'),
     config = require('./config.js'),
     uuid = require('uuid');
 
-describe('devices', function() {
+describe.skip('devices', function() {
     it('GET devices should return 404', function(done) {
         request(config.target)
             .get('/api/devices')
