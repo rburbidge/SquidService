@@ -20,7 +20,7 @@ export class Google {
      * @param token The ID token.
      */
     public getIdTokenUser(token: string): Promise<User> {
-        return this.getTokenInfoImpl(TokenType.Id, token)
+        return this.getGoogleToken(TokenType.Id, token)
             .then((body: IGoogleIdToken) => {
                 return User.fromIdToken(body);
             })
@@ -35,10 +35,11 @@ export class Google {
      * @param token The access token.
      */
     public getAccessTokenUser(token: string): Promise<User> {
-        return this.getTokenInfoImpl(TokenType.Access, token)
-            .then(() => {
-                return Google.getUserInfo(token);
-            })
+        // TODO These calls could be done in parallel with Promise.all()
+        return this.getGoogleToken(TokenType.Access, token)
+            // For access token we still need to call getUserInfo because it does not contain the user info, such as
+            // the user's unique ID.
+            .then(() => Google.getUserInfo(token))
             .catch((error) => {
                 console.warn('Error validating Google access token: ' + error)
                 throw new ErrorModel(ErrorCode.Authorization, 'Error validating Google access token');
@@ -79,17 +80,22 @@ export class Google {
      * @param tokenType One of the TokenType values.
      * @param token The token.
      */
-    private getTokenInfoImpl(tokenType: string, token: string): Promise<any> {
-        return axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?${tokenType}=${token}`)
-            .then(response => {
-                const body: IGoogleToken = response.data;
-
+    private getGoogleToken(tokenType: string, token: string): Promise<IGoogleToken> {
+        return this.getTokenInfo(tokenType, token)
+            .then(data => {
+                const body: IGoogleToken = data;
+                
                 // Verify that token client ID matches whitelist of client IDs
                 if(!this.clientIds) throw new ErrorModel(ErrorCode.ServiceConfig, 'Google clientIds is null');                
                 if(this.clientIds.indexOf(body.aud) == -1) throw 'Google token had invalid client ID in aud field:' + body.aud;
 
                 return body;
-            })
+            });
+    }
+
+    private getTokenInfo(tokenType: string, token: string): Promise<any> {
+        return axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?${tokenType}=${token}`)
+            .then(response => response.data)
             .catch((error) => {
                 throw `Get tokeninfo returned Status=${error.response.status}, Body=${JSON.stringify(error.response.data)}`;
             });
