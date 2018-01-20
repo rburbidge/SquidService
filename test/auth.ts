@@ -1,3 +1,4 @@
+import { Config }  from '../config/config';
 import { createServer } from '../server';
 import { ErrorCode } from '../exposed/squid';
 import { ErrorModel } from '../models/error-model';
@@ -7,23 +8,13 @@ import { User } from '../data/models/user';
 import * as assert from 'assert';
 import * as express from 'express';
 import * as http from 'http';
+import * as mongodb from 'mongodb';
 import * as request from 'supertest';
 import * as sinon from 'sinon';
 
+import { server, testFixture } from './setup';
+
 describe('Authentication', function() {
-    let app: http.Server;
-
-    let google: Google;
-
-    beforeEach(() =>  {
-        google = new Google("apiKey", ["clientId1", "clientId2"]);
-        
-        return createServer(google)
-            .then(expressApp => app = expressApp);
-    });
-    
-    afterEach(() => app.close());
-
     describe('Succeeds', () => {
         beforeEach(() => {
             setupGoogleGetIdTokenReturns(Promise.resolve({} as User));
@@ -41,7 +32,7 @@ describe('Authentication', function() {
         });
 
         function testSucceeds(authHeader) {
-            return request(app)
+            return request(server)
                 .get('/api/devices')
                 .set('Authorization', authHeader)
                 .expect(404)
@@ -53,7 +44,7 @@ describe('Authentication', function() {
         const noTokenErrorMessage = 'Authorization header must be sent with Google token';
         
         it('GET devices should return 401 with no Authorization header', () =>
-            request(app)
+            request(server)
                 .get('/api/devices')
                 .expect(401)
                 .then(response => testErrorModelEquals(response.body as ErrorModel, noTokenErrorMessage, ErrorCode.Authorization))
@@ -86,7 +77,7 @@ describe('Authentication', function() {
          * message.
          */
         function testAuthFailure(authHeader: string, expectedMessage: string): Promise<void> {
-            return request(app)
+            return request(server)
                 .get('/api/devices')
                 .set('Authorization', authHeader)
                 .expect(401)
@@ -95,12 +86,12 @@ describe('Authentication', function() {
     });
 
     function setupGoogleGetIdTokenReturns(result: Promise<User>) {
-        let getIdTokenUser = sinon.stub(google, 'getIdTokenUser');
+        let getIdTokenUser = sinon.stub(testFixture.google, 'getIdTokenUser');
         getIdTokenUser.returns(result);
     }
 
     function setupGoogleGetAccessTokenReturns(result: Promise<User>) {
-        let getAccessTokenUser = sinon.stub(google, 'getAccessTokenUser');
+        let getAccessTokenUser = sinon.stub(testFixture.google, 'getAccessTokenUser');
         getAccessTokenUser.returns(result);
     }
 

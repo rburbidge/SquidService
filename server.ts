@@ -11,52 +11,26 @@ import * as http from 'http';
 import * as mongodb from 'mongodb';
 
 const validator = require('express-validator');
-const config = require('config');
 
-export function createServer(google?: Google): Promise<http.Server> {
+export interface ServerOptions {
+    config: Config;
+    db: mongodb.Db;
+    google: Google;
+}
+
+export function createServer(options: ServerOptions): http.Server {
     // Start the server and log any errors that occur
     try {
-        return startServer(google)
-            .catch(error => {
-                console.log(`ERROR: Server could not be started: ${error}`);
-                return null;
-            });
+        return startServer(options);
     } catch(error) {
         console.log(`ERROR: Server could not be started: ${error}`);
+        return null;
     }
 }
 
-function startServer(google?: Google): Promise<http.Server> {
-    // Configuration is retrieved from <process.env.NODE_ENV>.json, so make sure that this is defined before proceeding
-    if(!process.env.NODE_ENV) throw 'Environment variable NODE_ENV is undefined. Define this and a matching config file\ne.g. NODE_ENV=foo and config file ./config/foo.json';
-    const configFileName = `${process.env.NODE_ENV}.json`;
-
-    // Retrieve and validate the config
-    const serverConfig = config.get('server') as Config;
-    try {
-        validateConfig(serverConfig);
-    } catch(error) {
-        throw `${configFileName} validation failed.\n\nERROR: ${error}.\n\nDid you fill in your config AND set the NODE_ENV environment variable?`
-    }
-
-    // Setup default dependencies if they were not passed in
-    if(!google) google = new Google(serverConfig.googleApiKey, serverConfig.googleValidClientIds);
-
-    // Connect to the database and start the server
-    const mongoClient: mongodb.MongoClient = mongodb.MongoClient;
-    return mongoClient.connect(serverConfig.database.url)
-        .then((db: mongodb.Db) => {
-            console.log('Connected to MongoDB');
-            return onDbConnected(serverConfig, db, google);
-        })
-        .catch(error => {
-            throw 'Error while connecting to MongoDB: ' + error;
-        });
-}
-
-function onDbConnected(serverConfig: Config, db: mongodb.Db, google: Google): http.Server {
+function startServer(options: ServerOptions): http.Server {
     // Create dependencies
-    const devicesDb: mongodb.Collection = db.collection('userDevices');
+    const devicesDb: mongodb.Collection = options.db.collection('userDevices');
     const devices: Devices = new Devices(devicesDb);
 
     // Bootstrap server and pipeline
@@ -67,9 +41,9 @@ function onDbConnected(serverConfig: Config, db: mongodb.Db, google: Google): ht
 
     // Routers
     app.use('', indexRouter());
-    app.use('/api/devices', devicesRouter(devices, google));
+    app.use('/api/devices', devicesRouter(devices, options.google));
 
-    const port: number = process.env.PORT || serverConfig.defaultPort;
+    const port: number = process.env.PORT || options.config.defaultPort;
     console.log('Server listening on port ' + port);
 
     return app.listen(port);
