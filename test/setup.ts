@@ -39,7 +39,7 @@ after(() => testFixture.db.close());
 beforeEach(() => {
     function createTestFixture(db: mongodb.Db): ServerOptions {
         const config: Config = {
-            defaultPort: 1,
+            defaultPort: 3001,
             googleApiKey: "apiKey",
             googleValidClientIds: ["clientId1", "clientId2"],
             database: {
