@@ -9,6 +9,7 @@ import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import * as http from 'http';
 import * as mongodb from 'mongodb';
+import * as winston from 'winston';
 
 const validator = require('express-validator');
 
@@ -23,7 +24,7 @@ export function createServer(options: ServerOptions): http.Server {
     try {
         return startServer(options);
     } catch(error) {
-        console.log(`ERROR: Server could not be started: ${error}`);
+        winston.error(`Server could not be started: ${error}`);
         return null;
     }
 }
@@ -44,7 +45,7 @@ function startServer(options: ServerOptions): http.Server {
     app.use('/api/devices', devicesRouter(devices, options.google));
 
     const port: number = process.env.PORT || options.config.defaultPort;
-    console.log('Server listening on port ' + port);
+    winston.info('Server listening on port ' + port);
 
     return app.listen(port);
 }

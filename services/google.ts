@@ -3,6 +3,7 @@ import { ErrorCode } from '../exposed/squid';
 import { User } from '../auth/user';
 import { TokenType } from '../auth/token-type';
 
+import * as winston from 'winston';
 const axios = require('axios');
 
 /** Contains helpers to access Google services. */
@@ -25,7 +26,7 @@ export class Google {
                 return User.fromIdToken(body);
             })
             .catch((error) => {
-                console.warn('Error validating Google ID token: ' + error);
+                winston.warn('Error validating Google ID token: ' + error);
                 throw new ErrorModel(ErrorCode.Authorization, 'Error validating Google ID token');
             });
     }
@@ -41,7 +42,7 @@ export class Google {
             // the user's unique ID.
             .then(() => Google.getUserInfo(token))
             .catch((error) => {
-                console.warn('Error validating Google access token: ' + error)
+                winston.warn('Error validating Google access token: ' + error)
                 throw new ErrorModel(ErrorCode.Authorization, 'Error validating Google access token');
             });
     }

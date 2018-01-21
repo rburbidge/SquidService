@@ -7,9 +7,11 @@ import { Google, MessageType } from '../services/google';
 import { googleAuth } from '../auth/google-auth';
 import { User } from '../data/models/user';
 import { Validate } from '../core/validate';
+
 import * as https from 'https';
 import * as express from 'express';
 import * as tex from '../core/typed-express';
+import * as winston from 'winston';
 
 /** The devices router. */
 export class DevicesRouter {
@@ -74,7 +76,7 @@ export class DevicesRouter {
                    .send(DevicesRouter.convert(addDeviceResult.device));
             })
             .catch((error: any) => {
-                console.error(`Add device failed: ${error}`);
+                winston.warn(`Add device failed: ${error}`);
                 ErrorHelper.send(res, error);
             });
     }
@@ -88,13 +90,13 @@ export class DevicesRouter {
     private deleteDevice(req: tex.IUrlParams<DeviceUrlParams>, res: express.Response): void {
         this.devicesDb.removeDevice(req.user.id, req.params.deviceId)
             .then((deleted: boolean) => {
-                console.log(deleted
+                winston.debug(deleted
                     ? 'Device ' + req.params.deviceId + ' deleted'
                     : 'Device ' + req.params.deviceId + ' did NOT exist');
                 res.status(200).send();
             })
             .catch(() => {
-                console.log('User does not exist');
+                winston.debug('User does not exist');
                 ErrorHelper.send(res, ErrorModel.fromErrorCode(ErrorCode.UserNotFound));;
             });
     }
