@@ -1,20 +1,14 @@
+import { Config }  from '../config/config';
 import { createServer } from '../server';
+import { server } from './setup';
 
 import * as express from 'express';
 import * as http from 'http';
+import * as request from 'supertest';
 
-const request = require('supertest');
-    
 describe('index', () => {
-    let app: http.Server;
-
-    before(() => createServer()
-        .then(expressApp => app = expressApp));
-
-    after(() => app.close());
-
     it('GET base url should return 200', () =>
-        request(app)
+        request(server)
             .get('')
             .expect(200)
             .expect('Hello Server')
