@@ -9,6 +9,7 @@ import { Google } from '../services/google';
 import * as http from 'http';
 import * as mockgo from 'mockgo';
 import * as mongodb from 'mongodb';
+import * as winston from 'winston';
 
 export let testFixture: ServerOptions;
 export let server: http.Server;
@@ -20,6 +21,12 @@ let db: mongodb.Db;
  * This is done once.
  */
 before((done) => {
+    // Turn off server logging for tests. Turning it on causes the output to be interlaced with the test log output,
+    // making it hard to read
+    winston.configure({
+        transports: []
+    });
+
     mockgo.getConnection((error, connection) => {
         db = connection;
         done();

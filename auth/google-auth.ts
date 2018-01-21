@@ -7,6 +7,7 @@ import { TokenType } from './token-type';
 import { User } from './user';
 import * as express from 'express';
 import * as tex from '../core/typed-express'
+import * as winston from 'winston';
 
 class GoogleAuth {
 
@@ -28,7 +29,7 @@ class GoogleAuth {
         return Promise.resolve(null)
             .then(result =>  GoogleAuth.parseAuthHeader(req))
             .then(parsedAuthHeader => {
-                console.log(`Google ${parsedAuthHeader.tokenType} received. Validating...`);
+                winston.debug(`Google ${parsedAuthHeader.tokenType} received. Validating...`);
 
                 switch(parsedAuthHeader.tokenType) {
                     case TokenType.Access:
@@ -48,14 +49,14 @@ class GoogleAuth {
         // Extract the token and return an error immediately if not found
         let authHeader: string = req.get('Authorization');
         if(!authHeader) {
-            console.error('AuthZ failed. No token was found');
+            winston.warn('AuthZ failed. No token was found');
             throw new ErrorModel(ErrorCode.Authorization, 'Authorization header must be sent with Google token');
         }
 
         // The auth header has a "<prefix> <token>" format. Parse the token for out for validation. If this fails, bomb out
         let parsedAuth: AuthToken = GoogleAuthHelper.parseAuthToken(authHeader);
         if(!parsedAuth) {
-            console.error(`AuthZ failed. token or tokenType could not be parsed. Authentication header: ${authHeader}`);
+            winston.warn(`AuthZ failed. token or tokenType could not be parsed. Authentication header: ${authHeader}`);
             throw new ErrorModel(ErrorCode.Authorization, 'Unable to parse Authorization header token');
         }
 
@@ -75,7 +76,7 @@ export function googleAuth(google: Google): express.RequestHandler {
         googleAuth.authenticate(req)
             .then((user: User) => {
                 req.user = user;
-                console.log('User is authZd');
+                winston.debug('User is authZd');
                 next();
             })
             .catch((error: any) => {

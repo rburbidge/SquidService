@@ -1,6 +1,7 @@
 import { ErrorModel } from '../models/error-model';
 import { ErrorCode } from '../exposed/squid';
 import * as express from 'express';
+import * as winston from 'winston';
 
 /**
  * Helpers for sending ErrorModels in Express HTTP responses.
@@ -17,7 +18,7 @@ export class ErrorHelper {
         if(error instanceof ErrorModel) {
             errorModel = error;
         } else {
-            console.log('An uncaught exception occurred: ' + error);
+            winston.warn('An uncaught exception occurred: ' + error);
             errorModel = new ErrorModel(ErrorCode.Unknown, 'Internal server error occurred');
         }
 

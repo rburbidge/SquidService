@@ -3,6 +3,7 @@ import { AddDeviceBody, ErrorCode } from '../exposed/squid';
 import { Device } from './models/device';
 import { User } from './models/user';
 import * as mongodb from 'mongodb';
+import * as winston from 'winston';
 let uuid = require('uuid');
 
 /**
@@ -32,7 +33,7 @@ export class Devices {
                 // Return existing device if one with the same GCM token already exists
                 const devicesWithGcmToken = user.devices.filter(device => device.gcmToken == deviceBody.gcmToken);
                 if(devicesWithGcmToken.length > 0) {
-                    console.log(`A device with GCM token ${deviceBody.gcmToken} already exists`);
+                    winston.debug(`A device with GCM token ${deviceBody.gcmToken} already exists`);
                     return devicesWithGcmToken[0];
                 }
 
@@ -72,7 +73,7 @@ export class Devices {
         .then((result: mongodb.UpdateWriteOpResult) => {
             // Device added to existing user
             if(result.modifiedCount === 1) {
-                console.log(`Device ${device.id} added to existing user`);
+                winston.debug(`Device ${device.id} added to existing user`);
                 return Promise.resolve(device);
             }
 
@@ -84,7 +85,7 @@ export class Devices {
             return this.collection.insert(user)
                 .then(result => {
                     if(result.insertedCount === 1) {
-                        console.log(`Device ${device.id} added to new user`);
+                        winston.debug(`Device ${device.id} added to new user`);
                         return device;
                     }
                     throw new Error('ERROR: Unable to add device to new user');
