@@ -10,8 +10,6 @@ import * as http from 'http';
 import * as mockgo from 'mockgo';
 import * as mongodb from 'mongodb';
 
-let mockgo = require('mockgo');
-
 export let testFixture: ServerOptions;
 export let server: http.Server;
 

@@ -16,18 +16,13 @@ import { server, testFixture } from './setup';
 
 describe('Authentication', function() {
     describe('Succeeds', () => {
-        beforeEach(() => {
-            setupGoogleGetIdTokenReturns(Promise.resolve({} as User));
-            setupGoogleGetAccessTokenReturns(Promise.resolve({} as User));
-        });
-
         it('Succeeds with valid ID token', () => {
-            //setupGoogleGetIdTokenReturns(Promise.resolve({} as User));
+            setupGoogleGetIdTokenReturns(Promise.resolve({} as User));
             return testSucceeds('Bearer Google OAuth ID Token=GOOD ID TOKEN');
         });
     
         it('Succeeds with valid access token', () => {
-            //setupGoogleGetAccessTokenReturns(Promise.resolve({} as User));
+            setupGoogleGetAccessTokenReturns(Promise.resolve({} as User));
             return testSucceeds('Bearer Google OAuth Access Token=GOOD ACCESS TOKEN');
         });
 
