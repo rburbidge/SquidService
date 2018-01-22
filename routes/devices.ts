@@ -112,11 +112,11 @@ export class DevicesRouter {
             .then(user => {
                 let device: Device = user.devices.filter(d => d.id === req.params.deviceId)[0];
                 if(!device) {
-                    ErrorHelper.send(res, ErrorModel.fromErrorCode(ErrorCode.UserNotFound));
+                    ErrorHelper.send(res, ErrorModel.fromErrorCode(ErrorCode.DeviceNotFound));
                     return;
                 }
 
-                this.google.sendGcmMessage(
+                return this.google.sendGcmMessage(
                     {
                         type: MessageType.Url,
                         data: req.body.url,

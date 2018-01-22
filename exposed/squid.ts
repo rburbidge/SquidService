@@ -70,4 +70,7 @@ export enum ErrorCode {
 
     /** The user to be operated upon was not found. */
     UserNotFound = 4,
+
+    /** The device to be operated upon was not found. */
+    DeviceNotFound = 5,
 }

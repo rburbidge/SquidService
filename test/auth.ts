@@ -1,4 +1,9 @@
-import { assertErrorModelResponse } from './helpers';
+import {
+    assertErrorModelResponse,
+    setupGoogleGetAccessTokenReturns,
+    setupGoogleGetIdTokenReturns,
+    setupGoogleSendGcmMessageReturns
+} from './helpers';
 import { Config }  from '../config/config';
 import { createServer } from '../server';
 import { ErrorCode } from '../exposed/squid';
@@ -79,14 +84,4 @@ describe('Authentication', function() {
                 .then(response => assertErrorModelResponse(response, expectedMessage, ErrorCode.Authorization))
         }
     });
-
-    function setupGoogleGetIdTokenReturns(result: Promise<User>) {
-        let getIdTokenUser = sinon.stub(testFixture.google, 'getIdTokenUser');
-        getIdTokenUser.returns(result);
-    }
-
-    function setupGoogleGetAccessTokenReturns(result: Promise<User>) {
-        let getAccessTokenUser = sinon.stub(testFixture.google, 'getAccessTokenUser');
-        getAccessTokenUser.returns(result);
-    }
 });

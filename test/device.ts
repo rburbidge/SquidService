@@ -2,6 +2,7 @@ import { AddDeviceBody, DeviceModel, DeviceType, ErrorCode } from '../exposed/sq
 import { assertErrorModelResponse } from './helpers';
 import { server, testFixture } from './setup';
 import { User } from '../data/models/user';
+import { setupGoogleGetIdTokenReturns, setupGoogleSendGcmMessageReturns } from './helpers';
 
 import * as assert from 'assert';
 import * as uuid from 'uuid';
@@ -76,16 +77,27 @@ describe('Devices', () => {
         });
     });
 
-    it('POST devices/<deviceId>/commands should return 200', () => 
-        testAddDevice()
-            .then(device => {
-                request(server)
+    describe('POST devices/<deviceId>/commands', () => {
+        it('Should return 404 when device does not exist', () => 
+            testAddDevice()
+                .then(device => request(server)
+                    .post('/api/devices/badId/commands')
+                    .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
+                    .send({ url: 'http://www.google.com' })
+                    .expect(404)
+                    .then(response => assertErrorModelResponse(response, 'Device does not exist', ErrorCode.DeviceNotFound)))
+        );
+
+        it('Should return 200', () => {
+            setupGoogleSendGcmMessageReturns(Promise.resolve());
+            testAddDevice()
+                .then(device => request(server)
                     .post('/api/devices/' + device.id + '/commands')
                     .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
                     .send({ url: 'http://www.google.com' })
-                    .expect(200);
-            })
-    );
+                    .expect(200))
+        });
+    });
 
     function testAddDevice(addDeviceBody: AddDeviceBody = createAddDeviceBody(), expectedStatusCode = 200): Promise<DeviceModel> {
         return request(server)
@@ -109,11 +121,6 @@ describe('Devices', () => {
             .send(addDeviceBody)
             .expect(400)
             .then(response => assertErrorModelResponse(response, expectedErrorMessage, ErrorCode.BadRequest));
-    }
-
-    function setupGoogleGetIdTokenReturns(result: Promise<User>) {
-        let getIdTokenUser = sinon.stub(testFixture.google, 'getIdTokenUser');
-        getIdTokenUser.returns(result);
     }
 
     function createAddDeviceBody(): AddDeviceBody {

@@ -31,7 +31,9 @@ export class ErrorModel implements IErrorModel {
     private static getErrorMessage(errorCode: ErrorCode): string{
         switch(errorCode) {
             case ErrorCode.UserNotFound:
-                return 'User does not exist';       
+                return 'User does not exist';
+            case ErrorCode.DeviceNotFound:
+                return 'Device does not exist';
             default:
                 return 'Unknown error occurred';
         }

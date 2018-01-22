@@ -36,6 +36,7 @@ export class ErrorHelper {
             case ErrorCode.Authorization:
                 return 401;
             case ErrorCode.UserNotFound:
+            case ErrorCode.DeviceNotFound:
                 return 404;
             case ErrorCode.ServiceConfig:
             case ErrorCode.Unknown:
