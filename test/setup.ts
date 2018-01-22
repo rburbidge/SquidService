@@ -34,11 +34,6 @@ before((done) => {
 });
 
 /**
- * Close the database after all tests run.
- */
-after(() => testFixture.db.close());
-
-/**
  * Before each tests runs, create the server and the test fixture.
  */
 beforeEach(() => {
