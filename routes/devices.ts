@@ -108,9 +108,12 @@ export class DevicesRouter {
     /**
      * Sends a command to a user's device.
      * 
-     * Returns 404 if the user does not exist.
+     * Returns 404 if the user or device does not exist.
      */
-    @Validate(DevicesRouter.validateDeviceId)
+    @Validate(function(req: express.Request) {
+        DevicesRouter.validateDeviceId(req);
+        req.checkBody('url').notEmpty();
+    })
     private command(req: tex.IBodyAndUrlParams<CommandBody, DeviceUrlParams>, res: express.Response): void {
         this.devicesDb.getUser(req.user.id)
             .then(user => {
@@ -140,7 +143,7 @@ export class DevicesRouter {
 
     /** Validates that there is a non-empty device ID URL parameter. */
     private static validateDeviceId(req: express.Request) {
-        req.check('deviceId', 'Must pass deviceId').notEmpty();
+        req.check('deviceId').notEmpty();
     }
 
     /** Converts a Device to DeviceModel. */

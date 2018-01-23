@@ -150,6 +150,14 @@ describe('Devices', () => {
     });
 
     describe('POST devices/<deviceId>/commands', () => {
+        it('Should return 400 when url is not passed', () => {
+            return request(server)
+                .post('/api/devices/whateverId/commands')
+                .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
+                .expect(400)
+                .then(response => assertErrorModelResponse(response, 'Malformed request: Must pass url in body', ErrorCode.BadRequest));
+        });
+
         it('Should return 404 when user does not exist', () => 
             request(server)
                 .post('/api/devices/badId/commands')
