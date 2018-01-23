@@ -66,19 +66,25 @@ describe('Devices', () => {
         it('Should return 400 if gcmToken not passed', () => {
             let addDeviceBody = createAddDeviceBody();
             addDeviceBody.gcmToken = null;
-            return testAddDeviceFails(addDeviceBody);
+            return testAddDeviceFails(addDeviceBody, 'Malformed request: Must pass gcmToken in body');
         });
 
         it('Should return 400 if deviceType not passed', () => {
             let addDeviceBody = createAddDeviceBody();
             addDeviceBody.deviceType = null;
-            return testAddDeviceFails(addDeviceBody);
+            return testAddDeviceFails(addDeviceBody, 'Malformed request: Must pass deviceType in body');
+        });
+
+        it('Should return 400 if deviceType is invalid', () => {
+            let addDeviceBody = createAddDeviceBody();
+            (addDeviceBody as any).deviceType = 'Not a valid type';
+            return testAddDeviceFails(addDeviceBody, 'Malformed request: Invalid deviceType. Must be one of ["android","chrome"]');
         });
 
         it('Should return 400 if name not passed', () => {
             let addDeviceBody = createAddDeviceBody();
             addDeviceBody.name = null;
-            return testAddDeviceFails(addDeviceBody);
+            return testAddDeviceFails(addDeviceBody, 'Malformed request: Must pass name in body');
         });      
 
         it('Should return error when device limit is reached', () => {
@@ -102,6 +108,13 @@ describe('Devices', () => {
     });
 
     describe('DELETE devices/<deviceId>', () => {
+        it('Should return 404 when device ID is not passed', () => {
+            return request(server)
+                .delete('/api/devices/')
+                .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
+                .expect(404);
+        });
+
         it('Should return 200 when user does not exist', () => {
             return testDeleteDevice('badId');
         });
@@ -137,6 +150,14 @@ describe('Devices', () => {
     });
 
     describe('POST devices/<deviceId>/commands', () => {
+        it('Should return 400 when url is not passed', () => {
+            return request(server)
+                .post('/api/devices/whateverId/commands')
+                .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
+                .expect(400)
+                .then(response => assertErrorModelResponse(response, 'Malformed request: Must pass url in body', ErrorCode.BadRequest));
+        });
+
         it('Should return 404 when user does not exist', () => 
             request(server)
                 .post('/api/devices/badId/commands')

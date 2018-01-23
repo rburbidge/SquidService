@@ -2,6 +2,7 @@ import { ErrorModel } from '../models/error-model';
 import { ErrorCode } from '../exposed/squid';
 
 import * as express from 'express';
+import * as expressValidator from 'express-validator';
 
 /**
  * Executes a validation function to be applied to a method.
@@ -32,14 +33,20 @@ export function Validate(validate: IValidator) {
         descriptor.value = function(req: express.Request, res: express.Response) {
             validate(req, res);
 
-            const errors = req.validationErrors();
-            if (errors) {
-                res.status(400).send(new ErrorModel(
-                    ErrorCode.BadRequest, 'Malformed request', errors as ExpressValidator.MappedError[]));
-                return;
-            }
+            const args = arguments;
 
-            originalMethod.apply(this, arguments)
+            req.getValidationResult()
+                .then(result => {
+                    if(result.isEmpty()) {
+                        originalMethod.apply(this, args);
+                    } else {
+                        const firstError = result.array({onlyFirstError: true})[0];
+                        let errorMessage = firstError.value
+                            ? `Invalid ${firstError.param}. ${firstError.msg}`
+                            : `Must pass ${firstError.param} in ${firstError.location}`
+                        res.status(400).send(new ErrorModel(ErrorCode.BadRequest, 'Malformed request: ' + errorMessage));        
+                    }
+                });
         };
     };
 }
