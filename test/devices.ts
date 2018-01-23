@@ -78,19 +78,38 @@ describe('Devices', () => {
     });
 
     describe('POST devices/<deviceId>/commands', () => {
+        it('Should return 404 when user does not exist', () => 
+            request(server)
+                .post('/api/devices/badId/commands')
+                .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
+                .send({ url: 'http://www.google.com' })
+                .expect(404)
+                .then(response => assertErrorModelResponse(response, 'User does not exist', ErrorCode.UserNotFound)));
+
         it('Should return 404 when device does not exist', () => 
             testAddDevice()
                 .then(device => request(server)
                     .post('/api/devices/badId/commands')
                     .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
                     .send({ url: 'http://www.google.com' })
-                    .expect(404)
-                    .then(response => assertErrorModelResponse(response, 'Device does not exist', ErrorCode.DeviceNotFound)))
+                    .expect(404))
+                .then(response => assertErrorModelResponse(response, 'Device does not exist', ErrorCode.DeviceNotFound))
         );
+
+        it('Should return 500 when GCM token is invalid', () => {
+            setupGoogleSendGcmMessageReturns(Promise.reject("Some error occurred"));
+            return testAddDevice()
+                .then(device => request(server)
+                    .post('/api/devices/' + device.id + '/commands')
+                    .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
+                    .send({ url: 'http://www.google.com' })
+                    .expect(500))
+                .then(response => assertErrorModelResponse(response, 'Internal server error occurred', ErrorCode.Unknown));
+        });
 
         it('Should return 200', () => {
             setupGoogleSendGcmMessageReturns(Promise.resolve());
-            testAddDevice()
+            return testAddDevice()
                 .then(device => request(server)
                     .post('/api/devices/' + device.id + '/commands')
                     .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
