@@ -1,4 +1,4 @@
-import { AddDeviceBody, CommandBody, DeviceModel, ErrorCode } from '../exposed/squid';
+import { AddDeviceBody, CommandBody, DeviceType, DeviceModel, ErrorCode } from '../exposed/squid';
 import { Device } from '../data/models/device';
 import { Devices } from '../data/devices';
 import { ErrorModel } from '../models/error-model';
@@ -65,9 +65,13 @@ export class DevicesRouter {
     @Validate(
         function(req: express.Request)
         {
-            req.checkBody('name', 'Must pass name').notEmpty();
-            req.checkBody('gcmToken', 'Must pass gcmToken').notEmpty();
-            req.checkBody('deviceType', 'Must pass type').notEmpty();
+            req.checkBody('name').notEmpty();
+            req.checkBody('gcmToken').notEmpty();
+
+            const validDeviceTypes = [DeviceType.android, DeviceType.chrome];
+            req.checkBody('deviceType')
+                .notEmpty()
+                .isIn(validDeviceTypes).withMessage('Must be one of ' + JSON.stringify(validDeviceTypes));
         })
     private addDevice(req: tex.IBody<AddDeviceBody>, res: express.Response): void {
         this.devicesDb.addDevice(req.user.id, req.body)
