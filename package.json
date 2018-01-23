@@ -40,8 +40,9 @@
     "yargs": "^6.6.0"
   },
   "scripts": {
-    "test": "mocha",
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "mocha -w",
+    "testSingle": "mocha"
   },
   "repository": {
     "type": "git",

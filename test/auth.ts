@@ -1,3 +1,9 @@
+import {
+    assertErrorModelResponse,
+    setupGoogleGetAccessTokenReturns,
+    setupGoogleGetIdTokenReturns,
+    setupGoogleSendGcmMessageReturns
+} from './helpers';
 import { Config }  from '../config/config';
 import { createServer } from '../server';
 import { ErrorCode } from '../exposed/squid';
@@ -5,7 +11,6 @@ import { ErrorModel } from '../models/error-model';
 import { Google } from '../services/google';
 import { User } from '../data/models/user';
 
-import * as assert from 'assert';
 import * as express from 'express';
 import * as http from 'http';
 import * as mongodb from 'mongodb';
@@ -31,7 +36,7 @@ describe('Authentication', function() {
                 .get('/api/devices')
                 .set('Authorization', authHeader)
                 .expect(404)
-                .then(response => testErrorModelEquals(response.body as ErrorModel, 'The user does not exist', ErrorCode.UserNotFound))
+                .then(response => assertErrorModelResponse(response, 'The user does not exist', ErrorCode.UserNotFound))
         }
     });
 
@@ -42,7 +47,7 @@ describe('Authentication', function() {
             request(server)
                 .get('/api/devices')
                 .expect(401)
-                .then(response => testErrorModelEquals(response.body as ErrorModel, noTokenErrorMessage, ErrorCode.Authorization))
+                .then(response => assertErrorModelResponse(response, noTokenErrorMessage, ErrorCode.Authorization))
         );
     
         it('GET devices should return 401 with empty Authorization header',
@@ -76,23 +81,7 @@ describe('Authentication', function() {
                 .get('/api/devices')
                 .set('Authorization', authHeader)
                 .expect(401)
-                .then(response => testErrorModelEquals(response.body as ErrorModel, expectedMessage, ErrorCode.Authorization))
+                .then(response => assertErrorModelResponse(response, expectedMessage, ErrorCode.Authorization))
         }
     });
-
-    function setupGoogleGetIdTokenReturns(result: Promise<User>) {
-        let getIdTokenUser = sinon.stub(testFixture.google, 'getIdTokenUser');
-        getIdTokenUser.returns(result);
-    }
-
-    function setupGoogleGetAccessTokenReturns(result: Promise<User>) {
-        let getAccessTokenUser = sinon.stub(testFixture.google, 'getAccessTokenUser');
-        getAccessTokenUser.returns(result);
-    }
-
-    function testErrorModelEquals(errorModel: ErrorModel, expectedMessage: string, expectedCode: ErrorCode) {
-        assert.equal(errorModel.code, expectedCode);
-        assert.equal(errorModel.codeString, ErrorCode[expectedCode]);
-        assert.equal(errorModel.message, expectedMessage);
-    }
 });

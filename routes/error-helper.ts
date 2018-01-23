@@ -22,7 +22,7 @@ export class ErrorHelper {
             errorModel = new ErrorModel(ErrorCode.Unknown, 'Internal server error occurred');
         }
 
-        res.status(ErrorHelper.errorCodeToHttpStatus(errorModel.code)).send(error);
+        res.status(ErrorHelper.errorCodeToHttpStatus(errorModel.code)).send(errorModel);
     }
 
     /**
@@ -36,6 +36,7 @@ export class ErrorHelper {
             case ErrorCode.Authorization:
                 return 401;
             case ErrorCode.UserNotFound:
+            case ErrorCode.DeviceNotFound:
                 return 404;
             case ErrorCode.ServiceConfig:
             case ErrorCode.Unknown:
