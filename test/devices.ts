@@ -15,14 +15,6 @@ describe('Devices', () => {
     });
 
     describe('GET devices', () => {
-        function testGetDevices(expected: DeviceModel[]): Promise<void> {
-            return request(server)
-                .get('/api/devices')
-                .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
-                .expect(200)
-                .then(response => assert.deepEqual(response.body, expected));
-        }
-
         it('Should return 404 when user does not exist', () => {
             return request(server)
                 .get('/api/devices')
@@ -31,8 +23,11 @@ describe('Devices', () => {
                 .then(response => assertErrorModelResponse(response, 'The user does not exist', ErrorCode.UserNotFound))
         });
 
-        it.skip('Should return no devices', () => {
-            // TODO Implement this test
+        it('Should return no devices when user exists but has no devices', () => {
+            // To setup a user with no devices, add a device for the user, then remove their only device
+            return testAddDevice()
+                .then(device => testDeleteDevice(device.id))
+                .then(() => testGetDevices([]));
         });
 
         it('Should return single device', () => {
@@ -106,6 +101,41 @@ describe('Devices', () => {
         });
     });
 
+    describe('DELETE devices/<deviceId>', () => {
+        it('Should return 200 when user does not exist', () => {
+            return testDeleteDevice('badId');
+        });
+
+        it('Should return 200 when device does not exist', () => {
+            return testAddDevice()
+                .then(device => testDeleteDevice('badId'));
+        });
+
+        it('Should return 200 when device exists', () => {
+            return testAddDevice()
+                .then(device => testDeleteDevice(device.id));
+        });
+
+        it('Should delete a device', () => {
+            let device1: DeviceModel,
+                device2: DeviceModel,
+                device3: DeviceModel;
+
+            // Add 3 devices
+            return testAddDevice()
+                .then(device => device1 = device)
+                .then(() => testAddDevice())
+                .then(device => device2 = device)
+                .then(() => testAddDevice())
+                .then(device => device3 = device)
+                // Delete single device
+                .then(() => testDeleteDevice(device2.id))
+                // Check that other devices still remain
+                .then(() => testGetDevices([device1, device3]))
+
+        });
+    });
+
     describe('POST devices/<deviceId>/commands', () => {
         it('Should return 404 when user does not exist', () => 
             request(server)
@@ -169,6 +199,22 @@ describe('Devices', () => {
             .send(addDeviceBody)
             .expect(400)
             .then(response => assertErrorModelResponse(response, expectedErrorMessage, ErrorCode.BadRequest));
+    }
+
+    function testGetDevices(expected: DeviceModel[]): Promise<void> {
+        return request(server)
+            .get('/api/devices')
+            .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
+            .expect(200)
+            .then(response => assert.deepEqual(response.body, expected));
+    }
+
+    function testDeleteDevice(deviceId: string): Promise<void> {
+        return request(server)
+            .delete('/api/devices/' + deviceId)
+            .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
+            .expect(200)
+            .then(() => {});
     }
 
     function createAddDeviceBody(): AddDeviceBody {
