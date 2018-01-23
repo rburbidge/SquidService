@@ -20,6 +20,7 @@ export interface ServerOptions {
 }
 
 export function createServer(options: ServerOptions): http.Server {
+    winston.info('Starting server');
     // Start the server and log any errors that occur
     try {
         return startServer(options);
