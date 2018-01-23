@@ -9,7 +9,8 @@
             "request": "launch",
             "name": "Launch production",
             "env": {
-                "NODE_ENV": "production"
+                "NODE_ENV": "production",
+                "LOGGING": "true"
             },
             "program": "${workspaceRoot}/app.js",
             "outFiles": [
@@ -20,6 +21,9 @@
             "type": "node",
             "request": "launch",
             "name": "Mocha Tests",
+            "env": {
+                "LOGGING": ""
+            },
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "args": [
                 "-u",
