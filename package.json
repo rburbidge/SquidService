@@ -35,7 +35,7 @@
     "mockgo": "^1.1.7",
     "node-inspector": "^0.12.8",
     "sinon": "^4.1.5",
-    "supertest": "^2.0.0",
+    "supertest": "^3.0.0",
     "vinyl-ftp": "^0.6.0",
     "yargs": "^6.6.0"
   },
