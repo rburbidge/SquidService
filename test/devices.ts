@@ -14,24 +14,59 @@ describe('Devices', () => {
         setupGoogleGetIdTokenReturns(Promise.resolve({} as User));
     });
 
-    it('GET devices should return 404', () => {
-        return request(server)
-            .get('/api/devices')
-            .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
-            .expect(404)
-            .then(response => assertErrorModelResponse(response, 'The user does not exist', ErrorCode.UserNotFound))
+    describe('GET devices', () => {
+        function testGetDevices(expected: DeviceModel[]): Promise<void> {
+            return request(server)
+                .get('/api/devices')
+                .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
+                .expect(200)
+                .then(response => assert.deepEqual(response.body, expected));
+        }
+
+        it('Should return 404 when user does not exist', () => {
+            return request(server)
+                .get('/api/devices')
+                .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
+                .expect(404)
+                .then(response => assertErrorModelResponse(response, 'The user does not exist', ErrorCode.UserNotFound))
+        });
+
+        it.skip('Should return no devices', () => {
+            // TODO Implement this test
+        });
+
+        it('Should return single device', () => {
+            return testAddDevice()
+                .then(device => testGetDevices([device]));
+        });
+
+        it('Should return multiple devices', () => {
+            let device1: DeviceModel,
+                device2: DeviceModel,
+                device3: DeviceModel;
+
+            return testAddDevice()
+                .then(device => device1 = device)
+                .then(() => testAddDevice())
+                .then(device => device2 = device)
+                .then(() => testAddDevice())
+                .then(device => device3 = device)
+                .then(() => testGetDevices([device1, device2, device3]));
+        });
     });
 
     describe('POST devices', () => {
         it('Should return new device', () => testAddDevice());
 
-        it('Should return original device if one with the same GCM token is added a second time', () =>
-            testAddDevice()
+        it('Should return original device if one with the same GCM token is added a second time', () => {
+            const addDeviceBody = createAddDeviceBody();
+
+            return testAddDevice(addDeviceBody)
                 .then(originalDevice => {
-                    return testAddDevice(undefined, 302)
-                        .then(newDevice => assert.equal(newDevice.id, originalDevice.id, ''));
+                    return testAddDevice(addDeviceBody, 302)
+                        .then(newDevice => assert.equal(newDevice.id, originalDevice.id, 'Returned device ID should equal the original device ID'));
                 })
-        );
+        });
 
         it('Should return 400 if gcmToken not passed', () => {
             let addDeviceBody = createAddDeviceBody();
@@ -52,24 +87,18 @@ describe('Devices', () => {
         });      
 
         it('Should return error when device limit is reached', () => {
-            function testAddDeviceWithUniqueGcmToken(): Promise<DeviceModel> {
-                const addDeviceBody = createAddDeviceBody();
-                addDeviceBody.gcmToken = uuid.v4();
-                return testAddDevice(addDeviceBody);
-            }
-
             // Device limit is 10
-            return testAddDeviceWithUniqueGcmToken()
-                .then(device => testAddDeviceWithUniqueGcmToken())
-                .then(device => testAddDeviceWithUniqueGcmToken())
-                .then(device => testAddDeviceWithUniqueGcmToken())
-                .then(device => testAddDeviceWithUniqueGcmToken())
-                .then(device => testAddDeviceWithUniqueGcmToken())
-                .then(device => testAddDeviceWithUniqueGcmToken())
-                .then(device => testAddDeviceWithUniqueGcmToken())
-                .then(device => testAddDeviceWithUniqueGcmToken())
+            return testAddDevice()
+                .then(device => testAddDevice())
+                .then(device => testAddDevice())
+                .then(device => testAddDevice())
+                .then(device => testAddDevice())
+                .then(device => testAddDevice())
+                .then(device => testAddDevice())
+                .then(device => testAddDevice())
+                .then(device => testAddDevice())
                 // 10th device add succeeds
-                .then(device => testAddDeviceWithUniqueGcmToken()) 
+                .then(device => testAddDevice()) 
                 // 11th device add fails
                 .then(device => testAddDeviceFails(
                     createAddDeviceBody(),
@@ -144,8 +173,8 @@ describe('Devices', () => {
 
     function createAddDeviceBody(): AddDeviceBody {
         return {
-            name: 'DeviceName',
-            gcmToken: 'GcmToken',
+            name: 'DeviceName ' + uuid.v4().toString().substr(0, 8),
+            gcmToken: uuid.v4(),
             deviceType: DeviceType.android
         };
     }
