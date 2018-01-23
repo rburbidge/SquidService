@@ -21,12 +21,6 @@ let db: mongodb.Db;
  * This is done once.
  */
 before((done) => {
-    // Turn off server logging for tests. Turning it on causes the output to be interlaced with the test log output,
-    // making it hard to read
-    winston.configure({
-        transports: []
-    });
-
     mockgo.getConnection((error, connection) => {
         db = connection;
         done();

@@ -10,17 +10,6 @@ const config = require('config');
 import * as mongodb from 'mongodb';
 import * as winston from 'winston';
 
-// Configure logging
-winston.configure({
-    level: 'debug',
-    transports: [
-        new winston.transports.Console({
-            colorize: true,
-            timestamp: true
-        })
-    ]
-});
-
 // Configuration is retrieved from <process.env.NODE_ENV>.json, so make sure that this is defined before proceeding
 if(!process.env.NODE_ENV) throw 'Environment variable NODE_ENV is undefined. Define this and a matching config file\ne.g. NODE_ENV=foo and config file ./config/foo.json';
 const configFileName = `${process.env.NODE_ENV}.json`;

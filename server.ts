@@ -29,7 +29,26 @@ export function createServer(options: ServerOptions): http.Server {
     }
 }
 
+function configureLogging(): void {
+    // Conditionally enable logging during test execution
+    const loggingTransports: winston.TransportInstance[] = [];
+    if(process.env.LOGGING) {
+        loggingTransports.push(new winston.transports.Console({
+            colorize: true,
+            timestamp: true
+        }));
+    }
+
+    // Configure logging
+    winston.configure({
+        level: 'silly',
+        transports: loggingTransports
+    });
+}
+
 function startServer(options: ServerOptions): http.Server {
+    configureLogging();
+
     // Create dependencies
     const devicesDb: mongodb.Collection = options.db.collection('userDevices');
     const devices: Devices = new Devices(devicesDb);
