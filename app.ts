@@ -22,13 +22,12 @@ try {
     throw `${configFileName} validation failed.\n\nERROR: ${error}.\n\nDid you fill in your config AND set the NODE_ENV environment variable?`
 }
 
-const mongoClient: mongodb.MongoClient = mongodb.MongoClient;
-mongoClient.connect(serverConfig.database.url)
-    .then((db: mongodb.Db) => {
+mongodb.MongoClient.connect(serverConfig.database.url)
+    .then((mongoClient: mongodb.MongoClient) => {
         winston.info('Connected to MongoDB');
         return createServer({
             config: serverConfig,
-            db: db,
+            db: mongoClient.db('prod'),
             google: new Google(serverConfig.googleApiKey, serverConfig.googleValidClientIds)
         });
     })
