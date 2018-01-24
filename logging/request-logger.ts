@@ -10,7 +10,7 @@ export function logger(req: express.Request, res: express.Response, next: expres
     winston.verbose('Begin ' + operation);
 
     // Log the request method, path, status code
-    let after: Function = () => {
+    let after = () => {
         winston.verbose('End ' + operation + ' ' + res.statusCode);
     };
     res.on('finish', after);
