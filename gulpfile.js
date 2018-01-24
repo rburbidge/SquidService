@@ -1,7 +1,6 @@
 var argv = require('yargs').argv,
     gulp = require('gulp'),
     ftp = require( 'vinyl-ftp'),
-    git = require('gulp-git')
     gutil = require('gulp-util'),
     ts = require("gulp-typescript"),
     tsProject = ts.createProject("tsconfig.json");

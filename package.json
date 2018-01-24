@@ -29,7 +29,6 @@
     "@types/winston": "^2.3.7",
     "assert": "^1.4.1",
     "gulp": "^3.9.1",
-    "gulp-git": "^1.14.0",
     "gulp-typescript": "^3.2.4",
     "gulp-util": "^3.0.8",
     "mocha": "^3.5.3",
