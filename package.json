@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@types/assert": "0.0.31",
-    "@types/body-parser": "0.0.33",
+    "@types/body-parser": "^1.16.8",
     "@types/es6-promise": "0.0.32",
     "@types/express-validator": "^2.20.33",
     "@types/mocha": "^2.2.47",
