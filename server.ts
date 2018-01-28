@@ -45,7 +45,7 @@ function startServer(options: ServerOptions): http.Server {
     app.use('/api/devices', devicesRouter(devices, options.google));
 
     const port: number = process.env.PORT
-        ? parseInt(process.env.PORT)
+        ? process.env.PORT
         : options.config.defaultPort;
     winston.info('Server listening on port ' + port);
 
