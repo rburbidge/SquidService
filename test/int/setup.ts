@@ -2,9 +2,9 @@
  * Sets up the test fixture, server, and database before each test.
  */
 
-import { Config }  from '../config/config';
-import { createServer, ServerOptions } from '../server';
-import { Google } from '../services/google';
+import { Config }  from '../../config/config';
+import { createServer, ServerOptions } from '../../server';
+import { Google } from '../../services/google';
 
 import * as http from 'http';
 import * as mockgo from 'mockgo';

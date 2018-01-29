@@ -1,7 +1,7 @@
-import { AddDeviceBody, DeviceModel, DeviceType, ErrorCode } from '../exposed/squid';
+import { AddDeviceBody, DeviceModel, DeviceType, ErrorCode } from '../../exposed/squid';
 import { assertErrorModelResponse } from './helpers';
 import { server, testFixture } from './setup';
-import { User } from '../data/models/user';
+import { User } from '../../data/models/user';
 import { setupGoogleGetIdTokenReturns, setupGoogleSendGcmMessageReturns } from './helpers';
 
 import * as assert from 'assert';

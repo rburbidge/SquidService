@@ -40,8 +40,8 @@
   },
   "scripts": {
     "start": "node app.js",
-    "test": "mocha -w",
-    "testSingle": "mocha"
+    "test": "mocha -w test/int",
+    "testSingle": "mocha test/int"
   },
   "repository": {
     "type": "git",

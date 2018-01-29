@@ -4,12 +4,12 @@ import {
     setupGoogleGetIdTokenReturns,
     setupGoogleSendGcmMessageReturns
 } from './helpers';
-import { Config }  from '../config/config';
-import { createServer } from '../server';
-import { ErrorCode } from '../exposed/squid';
-import { ErrorModel } from '../models/error-model';
-import { Google } from '../services/google';
-import { User } from '../data/models/user';
+import { Config }  from '../../config/config';
+import { createServer } from '../../server';
+import { ErrorCode } from '../../exposed/squid';
+import { ErrorModel } from '../../models/error-model';
+import { Google } from '../../services/google';
+import { User } from '../../data/models/user';
 
 import * as express from 'express';
 import * as http from 'http';

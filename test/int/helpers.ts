@@ -1,7 +1,7 @@
-import { ErrorCode } from '../exposed/squid';
-import { ErrorModel } from '../models/error-model';
+import { ErrorCode } from '../../exposed/squid';
+import { ErrorModel } from '../../models/error-model';
 import { testFixture } from './setup';
-import { User } from '../data/models/user';
+import { User } from '../../data/models/user';
 
 import * as assert from 'assert';
 import * as http from 'express';

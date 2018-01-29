@@ -1,5 +1,5 @@
-import { Config }  from '../config/config';
-import { createServer } from '../server';
+import { Config }  from '../../config/config';
+import { createServer } from '../../server';
 import { server } from './setup';
 
 import * as express from 'express';
