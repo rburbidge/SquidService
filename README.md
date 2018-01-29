@@ -14,7 +14,7 @@ npm install -g typescript gulp
 ## Commands
 * Build: ```tsc -w```
 * Run the server locally: ```npm start```
-* Clean: ```gulp clean```
+* Clean: ```git clean -fxd```
 * Test in watch mode: ```npm test```
 * Test in single run mode: ```npm run testSingle```
 
@@ -47,16 +47,15 @@ npm start
 ## Deploying to Azure
 Below are the commands for a fresh deployment. You will need credentials to deploy to Azure. These can be found in the publish profile configuration, which can be found on the [Azure Portal](https://portal.azure.com/.)
 ```
-gulp deployTypes -user=<FTP username> -pass=<FTP password>
-gulp deployProdConfig -user=<FTP username> -pass=<FTP password>
+gulp deployProdConfig -host=<FTP host> -user=<FTP username> -pass=<FTP password>
 git push azure master
 ```
 
 If you don't have the azure remote yet, run:
 
-```git remote add azure https://sirnommington.scm.azurewebsites.net:443```
+```git remote add azure https://<site name>.scm.azurewebsites.net:443```
 
 ### How the deployment works
-When a new commit is pushed to ```azure master```, the ```./deploy.cmd``` script runs NPM package install. The install will fail to sync the ```@types``` packages. This is why we ran ```gulp deployTypes``` earlier, which uploads those npm packages to the correct directory via FTP. ```./deploy.cmd``` will then build the service, and then launch ```node server.js```.
+When a new commit is pushed to ```azure master```, the ```./deploy.cmd``` script runs NPM package install. ```./deploy.cmd``` will then build the service, and then launch ```npm start``` from ```package.json```.
 
-```gulp deployProdConfig``` deploys ```./config/production.json``` to the server. This is intentionally not stored in the repo because it contains private data.
+```gulp deployProdConfig``` deploys ```./config/production.json``` to the server's ```site/wwwroot/config``` directory. This file is intentionally not stored in the repo because it contains private data.
