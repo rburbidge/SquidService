@@ -41,7 +41,9 @@
   "scripts": {
     "start": "node app.js",
     "test": "mocha -w test/int",
-    "testSingle": "mocha test/int"
+    "testSingle": "mocha test/int",
+    "testE2E": "mocha -w test/e2e",
+    "testE2ESingle": "mocha test/e2e"
   },
   "repository": {
     "type": "git",
