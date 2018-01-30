@@ -34,6 +34,7 @@
     "mockgo": "^1.1.7",
     "node-inspector": "^0.12.8",
     "sinon": "^4.2.1",
+    "start-server-and-test": "^1.0.0",
     "supertest": "^3.0.0",
     "vinyl-ftp": "^0.6.0",
     "yargs": "^6.6.0"
@@ -41,7 +42,10 @@
   "scripts": {
     "start": "node app.js",
     "test": "mocha -w",
-    "testSingle": "mocha"
+    "testSingle": "mocha",
+    "testE2E": "mocha -w --grep @e2e",
+    "testE2ESingle": "mocha --grep @e2e",
+    "testE2ESingleStart": "start-server-and-test start http://localhost:3000 testE2ESingle"
   },
   "repository": {
     "type": "git",

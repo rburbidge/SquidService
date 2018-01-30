@@ -1,6 +1,6 @@
 import { AddDeviceBody, DeviceModel, DeviceType, ErrorCode } from '../exposed/squid';
 import { assertErrorModelResponse } from './helpers';
-import { server, testFixture } from './setup';
+import { testFixture } from './setup';
 import { User } from '../data/models/user';
 import { setupGoogleGetIdTokenReturns, setupGoogleSendGcmMessageReturns } from './helpers';
 
@@ -16,7 +16,7 @@ describe('Devices', () => {
 
     describe('GET devices', () => {
         it('Should return 404 when user does not exist', () => {
-            return request(server)
+            return request(testFixture.server)
                 .get('/api/devices')
                 .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
                 .expect(404)
@@ -138,7 +138,7 @@ describe('Devices', () => {
 
     describe('POST devices/<deviceId>/commands', () => {
         it('Should return 404 when user does not exist', () => 
-            request(server)
+            request(testFixture.server)
                 .post('/api/devices/badId/commands')
                 .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
                 .send({ url: 'http://www.google.com' })
@@ -147,7 +147,7 @@ describe('Devices', () => {
 
         it('Should return 404 when device does not exist', () => 
             testAddDevice()
-                .then(device => request(server)
+                .then(device => request(testFixture.server)
                     .post('/api/devices/badId/commands')
                     .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
                     .send({ url: 'http://www.google.com' })
@@ -158,7 +158,7 @@ describe('Devices', () => {
         it('Should return 500 when GCM token is invalid', () => {
             setupGoogleSendGcmMessageReturns(Promise.reject("Some error occurred"));
             return testAddDevice()
-                .then(device => request(server)
+                .then(device => request(testFixture.server)
                     .post('/api/devices/' + device.id + '/commands')
                     .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
                     .send({ url: 'http://www.google.com' })
@@ -169,7 +169,7 @@ describe('Devices', () => {
         it('Should return 200', () => {
             setupGoogleSendGcmMessageReturns(Promise.resolve());
             return testAddDevice()
-                .then(device => request(server)
+                .then(device => request(testFixture.server)
                     .post('/api/devices/' + device.id + '/commands')
                     .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
                     .send({ url: 'http://www.google.com' })
@@ -178,7 +178,7 @@ describe('Devices', () => {
     });
 
     function testAddDevice(addDeviceBody: AddDeviceBody = createAddDeviceBody(), expectedStatusCode = 200): Promise<DeviceModel> {
-        return request(server)
+        return request(testFixture.server)
             .post('/api/devices')
             .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
             .send(addDeviceBody)
@@ -193,7 +193,7 @@ describe('Devices', () => {
     }
 
     function testAddDeviceFails(addDeviceBody: AddDeviceBody, expectedErrorMessage: string = 'Malformed request'): Promise<void> {       
-        return request(server)
+        return request(testFixture.server)
             .post('/api/devices')
             .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
             .send(addDeviceBody)
@@ -202,7 +202,7 @@ describe('Devices', () => {
     }
 
     function testGetDevices(expected: DeviceModel[]): Promise<void> {
-        return request(server)
+        return request(testFixture.server)
             .get('/api/devices')
             .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
             .expect(200)
@@ -210,7 +210,7 @@ describe('Devices', () => {
     }
 
     function testDeleteDevice(deviceId: string): Promise<void> {
-        return request(server)
+        return request(testFixture.server)
             .delete('/api/devices/' + deviceId)
             .set('Authorization', 'Bearer Google OAuth ID Token=GOOD ID TOKEN')
             .expect(200)

@@ -17,16 +17,16 @@ export function assertErrorModelResponse(response: request.Response, expectedMes
 }
 
 export function setupGoogleGetAccessTokenReturns(result: Promise<User>) {
-    let getAccessTokenUser = sinon.stub(testFixture.google, 'getAccessTokenUser');
+    let getAccessTokenUser = sinon.stub(testFixture.serverOptions.google, 'getAccessTokenUser');
     getAccessTokenUser.returns(result);
 }
 
 export function setupGoogleGetIdTokenReturns(result: Promise<User>) {
-    let getIdTokenUser = sinon.stub(testFixture.google, 'getIdTokenUser');
+    let getIdTokenUser = sinon.stub(testFixture.serverOptions.google, 'getIdTokenUser');
     getIdTokenUser.returns(result);
 }
 
 export function setupGoogleSendGcmMessageReturns(result: Promise<void>) {
-    let sendGcmMessage = sinon.stub(testFixture.google, 'sendGcmMessage');
+    let sendGcmMessage = sinon.stub(testFixture.serverOptions.google, 'sendGcmMessage');
     sendGcmMessage.returns(result);
 }

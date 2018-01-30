@@ -17,7 +17,7 @@ import * as mongodb from 'mongodb';
 import * as request from 'supertest';
 import * as sinon from 'sinon';
 
-import { server, testFixture } from './setup';
+import { testFixture } from './setup';
 
 describe('Authentication', function() {
     describe('Succeeds', () => {
@@ -32,7 +32,7 @@ describe('Authentication', function() {
         });
 
         function testSucceeds(authHeader) {
-            return request(server)
+            return request(testFixture.server)
                 .get('/api/devices')
                 .set('Authorization', authHeader)
                 .expect(404)
@@ -43,17 +43,17 @@ describe('Authentication', function() {
     describe('Fails', () => {
         const noTokenErrorMessage = 'Authorization header must be sent with Google token';
         
-        it('GET devices should return 401 with no Authorization header', () =>
-            request(server)
+        it('@e2e GET devices should return 401 with no Authorization header', () =>
+            request(testFixture.server)
                 .get('/api/devices')
                 .expect(401)
                 .then(response => assertErrorModelResponse(response, noTokenErrorMessage, ErrorCode.Authorization))
         );
     
-        it('GET devices should return 401 with empty Authorization header',
+        it('@e2e GET devices should return 401 with empty Authorization header',
             () => testAuthFailure('', noTokenErrorMessage));
     
-        it('GET devices should return 401 with bad Authorization header',
+        it('@e2e GET devices should return 401 with bad Authorization header',
             () => testAuthFailure('BAD AUTH HEADER', 'Unable to parse Authorization header token'));
             
         it('GET devices should return 401 with bad access token', () => {
@@ -77,7 +77,7 @@ describe('Authentication', function() {
          * message.
          */
         function testAuthFailure(authHeader: string, expectedMessage: string): Promise<void> {
-            return request(server)
+            return request(testFixture.server)
                 .get('/api/devices')
                 .set('Authorization', authHeader)
                 .expect(401)

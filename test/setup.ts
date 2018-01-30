@@ -1,66 +1,22 @@
-/**
- * Sets up the test fixture, server, and database before each test.
- */
-
-import { Config }  from '../config/config';
-import { createServer, ServerOptions } from '../server';
-import { Google } from '../services/google';
+import { ServerOptions } from '../server';
+import { setupInt } from './setup-int';
+import { setupE2E } from './setup-e2e';
 
 import * as http from 'http';
-import * as mockgo from 'mockgo';
-import * as mongodb from 'mongodb';
-import * as winston from 'winston';
 
-export let testFixture: ServerOptions;
-export let server: http.Server;
+export let testFixture: TestFixture;
 
-let db: mongodb.Db;
+export interface TestFixture {
+    serverOptions?: ServerOptions;
+    server: http.Server | string;
+}
 
-/**
- * Connect to an in-memory database that the tests will execute upon.
- * This is done once.
- */
-before((done) => {
-    // Turn off server logging for tests. Turning it on causes the output to be interlaced with the test log output,
-    // making it hard to read
-    winston.configure({
-        transports: []
-    });
+const testTarget = process.env.TEST_TARGET;
 
-    mockgo.getConnection((error, connection) => {
-        db = connection;
-        done();
-    })
-});
-
-/**
- * Before each tests runs, create the server and the test fixture.
- */
-beforeEach(() => {
-    function createTestFixture(db: mongodb.Db): ServerOptions {
-        const config: Config = {
-            defaultPort: 3001,
-            googleApiKey: "apiKey",
-            googleValidClientIds: ["clientId1", "clientId2"],
-            database: {
-                url: ''
-            }
-        };
-        return {
-            db: db,
-            config: config,
-            google: new Google(config.googleApiKey, config.googleValidClientIds)
-        }
-    }
-
-    testFixture = createTestFixture(db);
-    server = createServer(testFixture);
-});
-
-/**
- * After each test runs, close the server and drop the entire database.
- */
-afterEach(() => {
-    server.close();
-    return db.dropDatabase();
-});
+if(!testTarget) {
+    console.log(`TEST_TARGET=local`);
+    testFixture = setupInt();
+} else {
+    console.log(`TEST_TARGET=${testTarget}`);
+    testFixture = setupE2E(testTarget);
+}
