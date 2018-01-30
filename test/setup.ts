@@ -11,21 +11,12 @@ export interface TestFixture {
     server: http.Server | string;
 }
 
-const testCategory = process.env.TEST_CATEGORY;
+const testTarget = process.env.TEST_TARGET;
 
-if(!testCategory) {
-    throw 'Test category was not found. Set TEST_CATEGORY';
-}
-
-console.log(`Test category: ${testCategory}`);
-
-switch (testCategory) {
-    case 'int':
-        testFixture = setupInt();
-        break;
-    case 'e2e':
-        testFixture = setupE2E();
-        break;
-    default:
-        throw `Test category "${testCategory}" is not a supported test type`;
+if(!testTarget) {
+    console.log(`TEST_TARGET=local`);
+    testFixture = setupInt();
+} else {
+    console.log(`TEST_TARGET=${testTarget}`);
+    testFixture = setupE2E(testTarget);
 }

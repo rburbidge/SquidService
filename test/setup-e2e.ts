@@ -1,7 +1,7 @@
 import { TestFixture } from './setup';
 
-export function setupE2E(): TestFixture {
+export function setupE2E(testTarget: string): TestFixture {
     return {
-        server: "http://localhost:3000"
+        server: testTarget
     };
 }
