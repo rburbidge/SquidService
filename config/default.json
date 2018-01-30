@@ -4,6 +4,7 @@
         "googleApiKey": null, // Fill in
         "googleValidClientIds": null, // Fill in
         "database": {
+            "name": null, // Fill in
             "url": null // Fill in
         }
     }

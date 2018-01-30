@@ -14,9 +14,11 @@ export interface Config {
 
     /** The database config. */
     database: {
+        /** The MongoDB name. */
+        name: string;
 
-        /** The MongoDB database connection URL. */
-        url: string
+        /** The MongoDB connection URL. */
+        url: string;
     }
 }
 
