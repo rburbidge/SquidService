@@ -45,6 +45,7 @@ export function setupInt(): TestFixture {
                 googleApiKey: "apiKey",
                 googleValidClientIds: ["clientId1", "clientId2"],
                 database: {
+                    name: 'test',
                     url: ''
                 }
             };

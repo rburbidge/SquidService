@@ -37,9 +37,11 @@ const mongoClient: mongodb.MongoClient = mongodb.MongoClient;
 mongoClient.connect(serverConfig.database.url)
     .then((db: mongodb.Db) => {
         winston.info('Connected to MongoDB');
+        winston.info(`Database name: ${serverConfig.database.name}`);
+
         return createServer({
             config: serverConfig,
-            db: db,
+            db: db.db(serverConfig.database.name),
             google: new Google(serverConfig.googleApiKey, serverConfig.googleValidClientIds)
         });
     })

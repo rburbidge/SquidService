@@ -6,3 +6,4 @@ iisnode
 *.js.map
 !gulpfile.js
 config/production.json
+config/test.json
