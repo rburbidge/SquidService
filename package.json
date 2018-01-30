@@ -41,10 +41,10 @@
   },
   "scripts": {
     "start": "node app.js",
-    "test": "mocha -w test/int",
-    "testSingle": "mocha test/int",
-    "testE2E": "mocha -w test/e2e",
-    "testE2ESingle": "mocha test/e2e",
+    "test": "set TEST_CATEGORY=int&&mocha -w",
+    "testSingle": "set TEST_CATEGORY=int&&mocha",
+    "testE2E": "set TEST_CATEGORY=e2e&&mocha -w --grep @e2e",
+    "testE2ESingle": "set TEST_CATEGORY=e2e&&mocha --grep @e2e",
     "testE2ESingleStart": "start-server-and-test start http://localhost:3000 testE2ESingle"
   },
   "repository": {

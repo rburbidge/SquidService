@@ -1,9 +1,10 @@
-import { server } from './setup';
+import { testFixture } from './setup';
+
 import * as request from 'supertest';
 
-describe('index', () => {
+describe('@e2e index', () => {
     it('GET base url should return 200', () =>
-        request(server)
+        request(testFixture.server)
             .get('')
             .expect(200)
             .expect('Hello Server')

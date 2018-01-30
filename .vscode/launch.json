@@ -20,6 +20,9 @@
             "type": "node",
             "request": "launch",
             "name": "Mocha Tests",
+            "env": {
+                "TEST_CATEGORY": "int"
+            },
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "args": [
                 "-u",
