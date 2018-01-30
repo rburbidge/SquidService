@@ -22,7 +22,7 @@ Launch configs can be imported from ```./launch.json```
 
 ## Environment variables
 Name        | Description
-- | -
+-|-
 NODE_ENV    | Defines the config file that is used. e.g. ```foo``` will cause ```config/foo.json``` to be used. If not defined, then ```default.json``` will be used.
 PORT        | The port to listen on. If not defined, the the port in the config file will be used. This is just so that app hosting services such as Azure can define the port.
 TEST_TARGET | The URL to run tests, e.g. https://localhost:3000. If not defined, then a node ```http.Server``` instance will be used.
