@@ -15,34 +15,51 @@ npm install -g typescript gulp
 * Build: ```tsc -w```
 * Run the server locally: ```npm start```
 * Clean: ```git clean -fxd```
-* Test in watch mode: ```npm test```
-* Test in single run mode: ```npm run testSingle```
+* Testing: See [test commands](#Test-commands)
 
 ## Visual Studio Code
 Launch configs can be imported from ```./launch.json```
 
-## Running the server
-SquidService uses https://www.npmjs.com/package/config, and requires a config file at ```./config/*.json```.
+## Environment variables
+Name        | Description
+- | -
+NODE_ENV    | Defines the config file that is used. e.g. ```foo``` will cause ```config/foo.json``` to be used. If not defined, then ```default.json``` will be used.
+PORT        | The port to listen on. If not defined, the the port in the config file will be used. This is just so that app hosting services such as Azure can define the port.
+TEST_TARGET | The URL to run tests, e.g. https://localhost:3000. If not defined, then a node ```http.Server``` instance will be used.
 
-#### Default
-This uses ```./config/default.json```, which as cloned from the repo is intentionally incomplete. Fill in ```server.database.url``` with your MongoDB connection string.
-```
-npm start
-```
+## Configuration files and environments
+SquidService uses https://www.npmjs.com/package/config, and requires a config file at ```./config/*.json```, where ```*``` is the value of the ```NODE_ENV``` environment variable.
 
-#### Production
-This uses ```./config/production.json```, which is intentionally missing from the repo.
-```
-set NODE_ENV=production
-npm start
-```
+NODE_ENV   | Config file      | Description
+-|-|-
+N/A        | default.json    | This config file is intentionally incomplete because of IDs and connection strings. Fill in all of the null fields with your application information, and use ```config.ts``` to guide you.
+test       | test.json       | Points to "test" database, but all other fields are production. This is intentionally missing from the repo.
+production | production.json | Production configuration file. This is intentionally missing from the repo.
+foo        | foo.json        | Custom environment "foo".
 
-#### Custom
-To make a custom "foo" configuration, e.g. ```./config/foo.json```.
-```
-set NODE_ENV=foo
-npm start
-```
+## Tests
+
+Tests are all run using mocha. There are two types of tests:
+### Integration
+* Execute an in-test-process node http.Server instance.
+* Use in-memory mongoDB, cleared after every test.
+* Mock out service calls using sinon.
+### E2E
+* Execute on local or remote server deployed via npm start. Defined in ```TEST_TARGET``` environment variable.
+* Use persistent mongoDB.
+* Do not mock out service calls.
+
+### Test commands
+
+When running integration tests, ```TEST_TARGET``` should not be set. When running E2E tests, ```TEST_TARGET``` should the the URL of the service to be tested, e.g. http://localhost:3000.
+
+Test type | Test command | TEST_TARGET | Description
+-|-|-|-
+Integration | npm test                   | N/A        | Runs int tests in watch mode.
+Integration | npm run testSingle         | N/A        | Runs int tests once.
+E2E         | npm run testE2E            | Target URL | Runs E2E tests in watch mode.
+E2E         | npm run testE2ESingle      | Target URL | Runs E2E tests once.
+E2E         | npm run testE2ESingleStart | Target URL | Starts the server locally and waits for it to warm up, then runs E2E tests once against ```TEST_TARGET``` URL. This command is primarily used in the CI build.
 
 ## Deploying to Azure
 Below are the commands for a fresh deployment. You will need credentials to deploy to Azure. These can be found in the publish profile configuration, which can be found on the [Azure Portal](https://portal.azure.com/.)
