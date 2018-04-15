@@ -21,6 +21,14 @@ img:hover {
     border: 1px solid;
 }
 
+.android.placeholder {
+    border: none;
+}
+
 .chrome-ext {
     overflow: hidden;
+}
+
+.img-container {
+    text-align: center;
 }
