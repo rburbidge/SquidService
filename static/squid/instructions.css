@@ -1,0 +1,26 @@
+body {
+    background-color: #252839;
+    color: white;
+}
+
+img {
+    width: 100%;
+    max-width: 350px;
+    border-radius: 2px;
+    transition: transform .2s;
+}
+
+img:hover {
+    transform: scale(1.2);
+}
+
+.android {
+    width: 49%;
+    max-width: 300px;
+    display: inline-block;
+    border: 1px solid;
+}
+
+.chrome-ext {
+    overflow: hidden;
+}

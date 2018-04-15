@@ -43,6 +43,7 @@ function startServer(options: ServerOptions): http.Server {
     // Routers
     app.use('', indexRouter());
     app.use('/api/devices', devicesRouter(devices, options.google));
+    app.use('/squid', express.static('static/squid'));
 
     const port = process.env.PORT
         ? process.env.PORT

@@ -1,0 +1,48 @@
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="instructions.css"/>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script>
+        window.onload = () => {
+            let params = new URL(window.location.href).searchParams;
+            let origin = params.get('origin');
+            
+            if(params.get('client') == 'chrome-ext') {
+                 $(document.body).addClass('chrome-ext');
+            }
+
+            parent.postMessage({
+                type: 'height',
+                data: document.body.offsetHeight + 'px'
+            }, origin);
+
+
+        };
+    </script>   
+</head>
+<body>
+    <div class="container">
+        <h4>From Chrome</h4>
+        <ol>
+            <li>Click on the Squid logo.</li>
+            <li>Select the device.</li>
+            <li>Enjoy!</li>
+        </ol>
+    
+        <img src="chrome/instructions.png"/>
+    
+        <hr/>
+        
+        <h4>From Android</h4>
+        <ol>
+            <li>Click the share action.</li>
+            <li>Select the Squid app.</li>
+            <li>Select the device.</li>
+            <li>Enjoy!</li>
+        </ol>
+    
+        <img src="android/step1.jpg" class="android"/>
+        <img src="android/step2.jpg" class="android"/>
+        <img src="android/step3.jpg" class="android"/>
+    </div>
+</body>
