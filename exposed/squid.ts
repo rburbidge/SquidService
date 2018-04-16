@@ -78,14 +78,16 @@ export enum ErrorCode {
 }
 
 /**
- * The type of a message.
+ * The type of a SquidMessage.
  */
 type MessageType =
 /** An iframe is requesting for its height to be set. */
 'heightChanged';
 
 /**
- * A message that can be published on a Squid page.
+ * The type of MessageEvent.data that can be published by on a Squid page.
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
  */
 export interface SquidMessage {
     type: MessageType;
