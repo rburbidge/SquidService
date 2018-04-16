@@ -14,6 +14,16 @@ img {
     transition: transform .2s;
 }
 
+.inline-icon {
+    vertical-align: middle;
+    height: 20px;
+    width: 20px;
+}
+
+.instructions li {
+    line-height: 25px;
+}
+
 @media(hover: hover) {
     img:hover {
         transform: scale(1.2);
