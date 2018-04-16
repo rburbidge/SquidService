@@ -3,6 +3,10 @@ body {
     color: white;
 }
 
+.container {
+    max-width: 700px;
+}
+
 img {
     width: 100%;
     max-width: 350px;
@@ -10,8 +14,10 @@ img {
     transition: transform .2s;
 }
 
-img:hover {
-    transform: scale(1.2);
+@media(hover: hover) {
+    img:hover {
+        transform: scale(1.2);
+    }
 }
 
 .android {
