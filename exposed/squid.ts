@@ -1,3 +1,5 @@
+
+
 /** High level device type.  */
 export enum DeviceType {
     android = "android",
@@ -73,4 +75,19 @@ export enum ErrorCode {
 
     /** The device to be operated upon was not found. */
     DeviceNotFound = 5,
+}
+
+/**
+ * The type of a message.
+ */
+type MessageType =
+/** An iframe is requesting for its height to be set. */
+'heightChanged';
+
+/**
+ * A message that can be published on a Squid page.
+ */
+export interface SquidMessage {
+    type: MessageType;
+    data: any;
 }
