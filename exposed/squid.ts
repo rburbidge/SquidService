@@ -73,8 +73,30 @@ export enum ErrorCode {
     /** The user to be operated upon was not found. */
     UserNotFound = 4,
 
+    /** The user is not signed in. */
+    NotSignedIn = 5,
+
     /** The device to be operated upon was not found. */
-    DeviceNotFound = 5,
+    DeviceNotFound = 6,
+}
+
+/**
+ * The types of auth headers for Squid Service.
+ * 
+ * See http://stackoverflow.com/questions/8311836/how-to-identify-a-google-oauth2-user/13016081#13016081
+ * for details on access vs. ID tokens
+ */
+export enum AuthHeader {
+    /** Google access token type. */
+    GoogleOAuthAccessToken = 'Bearer Google OAuth Access Token',
+
+    /** Google ID token type. */
+    GoogleOAuthIdToken = 'Bearer Google OAuth ID Token'
+}
+
+/** Creates the value of an auth header. */
+export function createAuthHeader(headerType: AuthHeader, authToken: string) {
+    return headerType + "=" + authToken;
 }
 
 /**
