@@ -1,5 +1,3 @@
-
-
 /** High level device type.  */
 export enum DeviceType {
     android = "android",
@@ -103,8 +101,11 @@ export function createAuthHeader(headerType: AuthHeader, authToken: string) {
  * The type of a SquidMessage.
  */
 type MessageType =
-/** An iframe is requesting for its height to be set. */
-'heightChanged';
+    /**
+     * An iframe is requesting for its height to be set.
+     * Data will be a string indicating the height in pixels. e.g. "700px"
+     */
+    'heightChanged';
 
 /**
  * The type of MessageEvent.data that can be published by on a Squid page.
