@@ -17,6 +17,7 @@ export interface ServerOptions {
     config: Config;
     db: mongodb.Db;
     google: Google;
+    telemetry: Microsoft.ApplicationInsights.IAppInsights;
 }
 
 export function createServer(options: ServerOptions): http.Server {
@@ -42,7 +43,7 @@ function startServer(options: ServerOptions): http.Server {
 
     // Routers
     app.use('', indexRouter());
-    app.use('/api/devices', devicesRouter(devices, options.google));
+    app.use('/api/devices', devicesRouter(devices, options.google, options.telemetry));
     app.use('/squid', express.static('public/squid'));
 
     const port = process.env.PORT

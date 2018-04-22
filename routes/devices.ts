@@ -22,8 +22,13 @@ export class DevicesRouter {
      * Creates a new instance.
      * @param devicesDb The devices database.
      * @param google The Google service.
+     * @param telemetry The App Insights instance.
      */
-    constructor(private readonly devicesDb: Devices, private readonly google: Google) {
+    constructor(
+        private readonly devicesDb: Devices,
+        private readonly google: Google,
+        private readonly telemetry: any)
+    {
         this.router = express.Router();
 
         this.devicesDb = devicesDb;
@@ -72,6 +77,14 @@ export class DevicesRouter {
     private addDevice(req: tex.IBody<AddDeviceBody>, res: express.Response): void {
         this.devicesDb.addDevice(req.user.id, req.body)
             .then(addDeviceResult => {
+                this.telemetry.trackEvent({
+                    name: 'Device.Create',
+                    properties:
+                    {
+                        deviceType: req.body.deviceType,
+                        deviceExisted: addDeviceResult.added.toString()
+                    }
+                });
                 res.status(addDeviceResult.added ? 200 : 302)
                    .send(DevicesRouter.convert(addDeviceResult.device));
             })
@@ -123,6 +136,13 @@ export class DevicesRouter {
                     },
                     device.gcmToken)
                     .then(() => {
+                        this.telemetry.trackEvent({
+                            name: 'SendLink',
+                            properties: {
+                                destDeviceType: device.deviceType,
+                                url: req.body.url
+                            }
+                        });
                         res.status(200).end();
                     })
                     .catch(error => {
@@ -158,7 +178,7 @@ interface DeviceUrlParams {
  * Creates the devices express router.
  * @param devicesDb The devices database.
  */
-export function devicesRouter(devicesDb: Devices, google: Google): express.Router {
-    const router = new DevicesRouter(devicesDb, google);
+export function devicesRouter(devicesDb: Devices, google: Google, telemetry: any): express.Router {
+    const router = new DevicesRouter(devicesDb, google, telemetry);
     return router.router;
 }

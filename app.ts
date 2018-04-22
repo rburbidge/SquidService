@@ -33,6 +33,11 @@ try {
     throw `${configFileName} validation failed.\n\nERROR: ${error}.\n\nDid you fill in your config AND set the NODE_ENV environment variable?`
 }
 
+// Start app insights first so that it is properly integrated into other imported packages
+const appInsights = require('applicationinsights');
+appInsights.setup(serverConfig.insightsKey);
+appInsights.start();
+
 const mongoClient: mongodb.MongoClient = mongodb.MongoClient;
 mongoClient.connect(serverConfig.database.url)
     .then((db: mongodb.Db) => {
@@ -42,7 +47,8 @@ mongoClient.connect(serverConfig.database.url)
         return createServer({
             config: serverConfig,
             db: db.db(serverConfig.database.name),
-            google: new Google(serverConfig.googleApiKey, serverConfig.googleValidClientIds)
+            google: new Google(serverConfig.googleApiKey, serverConfig.googleValidClientIds),
+            telemetry: appInsights.defaultClient
         });
     })
     .catch(error => {

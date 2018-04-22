@@ -30,3 +30,7 @@ export function setupGoogleSendGcmMessageReturns(result: Promise<void>) {
     let sendGcmMessage = sinon.stub(testFixture.serverOptions.google, 'sendGcmMessage');
     sendGcmMessage.returns(result);
 }
+
+export function setupTelemetry() {
+    sinon.stub(testFixture.serverOptions.telemetry, 'trackEvent');
+}

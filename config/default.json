@@ -1,6 +1,7 @@
 {
     "server": {
         "defaultPort": 3000,
+        "insightsKey": null, // Fill in
         "googleApiKey": null, // Fill in
         "googleValidClientIds": null, // Fill in
         "database": {

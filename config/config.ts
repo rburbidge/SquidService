@@ -6,6 +6,9 @@ export interface Config {
     /** The API key used for Google Cloud Messaging service. */
     googleApiKey: string;
 
+    /** The key used for Azure App Insights. */
+    insightsKey: string;
+
     /**
      * A set of valid client Google client IDs. These correspond to the 'aud' field received in a Google ID or access
      * token.
@@ -19,7 +22,7 @@ export interface Config {
 
         /** The MongoDB connection URL. */
         url: string;
-    }
+    },
 }
 
 /** Throws an error iff the provided config is invalid. */
