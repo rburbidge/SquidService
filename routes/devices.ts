@@ -13,6 +13,7 @@ import * as https from 'https';
 import * as express from 'express';
 import * as tex from '../core/typed-express';
 import * as winston from 'winston';
+import { EventType } from '../logging/event-type';
 
 /** The devices router. */
 export class DevicesRouter {
@@ -78,7 +79,7 @@ export class DevicesRouter {
     private addDevice(req: tex.IBody<AddDeviceBody>, res: express.Response): void {
         this.devicesDb.addDevice(req.user.id, req.body)
             .then(addDeviceResult => {
-                this.telemetry.trackEvent('Device.Create',
+                this.telemetry.trackEvent(EventType.DeviceCreate,
                     {
                         deviceType: req.body.deviceType,
                         deviceExisted: addDeviceResult.added.toString()
@@ -135,7 +136,7 @@ export class DevicesRouter {
                     },
                     device.gcmToken)
                     .then(() => {
-                        this.telemetry.trackEvent('SendLink',
+                        this.telemetry.trackEvent(EventType.DeviceSendLink,
                             {
                                 destDeviceType: device.deviceType,
                                 url: req.body.url
