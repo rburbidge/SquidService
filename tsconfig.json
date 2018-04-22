@@ -5,11 +5,7 @@
         "noImplicitAny": false,
         "noImplicitThis": false,
         "sourceMap": true,
-        "experimentalDecorators": true,
-        "typeRoots": [
-            "./other_modules",
-            "./node_modules/@types"
-        ]
+        "experimentalDecorators": true
     },
     "exclude": [
         "node_modules/*"

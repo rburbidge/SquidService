@@ -7,6 +7,7 @@ import { Google, MessageType } from '../services/google';
 import { googleAuth } from '../auth/google-auth';
 import { User } from '../data/models/user';
 import { Validate } from '../core/validate';
+import { ITelemetry } from '../logging/telemetry';
 
 import * as https from 'https';
 import * as express from 'express';
@@ -27,7 +28,7 @@ export class DevicesRouter {
     constructor(
         private readonly devicesDb: Devices,
         private readonly google: Google,
-        private readonly telemetry: any)
+        private readonly telemetry: ITelemetry)
     {
         this.router = express.Router();
 
@@ -77,14 +78,12 @@ export class DevicesRouter {
     private addDevice(req: tex.IBody<AddDeviceBody>, res: express.Response): void {
         this.devicesDb.addDevice(req.user.id, req.body)
             .then(addDeviceResult => {
-                this.telemetry.trackEvent({
-                    name: 'Device.Create',
-                    properties:
+                this.telemetry.trackEvent('Device.Create',
                     {
                         deviceType: req.body.deviceType,
                         deviceExisted: addDeviceResult.added.toString()
                     }
-                });
+                );
                 res.status(addDeviceResult.added ? 200 : 302)
                    .send(DevicesRouter.convert(addDeviceResult.device));
             })
@@ -136,13 +135,11 @@ export class DevicesRouter {
                     },
                     device.gcmToken)
                     .then(() => {
-                        this.telemetry.trackEvent({
-                            name: 'SendLink',
-                            properties: {
+                        this.telemetry.trackEvent('SendLink',
+                            {
                                 destDeviceType: device.deviceType,
                                 url: req.body.url
-                            }
-                        });
+                            });
                         res.status(200).end();
                     })
                     .catch(error => {
@@ -177,8 +174,10 @@ interface DeviceUrlParams {
 /**
  * Creates the devices express router.
  * @param devicesDb The devices database.
+ * @param google Google services.
+ * @param telemetry Telemetry client.
  */
-export function devicesRouter(devicesDb: Devices, google: Google, telemetry: any): express.Router {
+export function devicesRouter(devicesDb: Devices, google: Google, telemetry: ITelemetry): express.Router {
     const router = new DevicesRouter(devicesDb, google, telemetry);
     return router.router;
 }

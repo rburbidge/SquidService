@@ -4,6 +4,7 @@ import { Google } from './services/google'
 import { devicesRouter } from './routes/devices';
 import { indexRouter}  from './routes/index';
 import { logger } from './logging/request-logger';
+import { ITelemetry } from './logging/telemetry';
 
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
@@ -17,7 +18,7 @@ export interface ServerOptions {
     config: Config;
     db: mongodb.Db;
     google: Google;
-    telemetry: Microsoft.ApplicationInsights.IAppInsights;
+    telemetry: ITelemetry;
 }
 
 export function createServer(options: ServerOptions): http.Server {

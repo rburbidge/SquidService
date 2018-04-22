@@ -4,7 +4,8 @@
 
 import { createServer } from './server';
 import { Config, validateConfig } from './config/config';
-import { Google } from './services/google'
+import { Google } from './services/google';
+import { AppInsights } from './services/app-insights';
 
 const config = require('config');
 import * as mongodb from 'mongodb';
@@ -48,7 +49,7 @@ mongoClient.connect(serverConfig.database.url)
             config: serverConfig,
             db: db.db(serverConfig.database.name),
             google: new Google(serverConfig.googleApiKey, serverConfig.googleValidClientIds),
-            telemetry: appInsights.defaultClient
+            telemetry: new AppInsights(appInsights.defaultClient)
         });
     })
     .catch(error => {
