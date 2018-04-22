@@ -4,6 +4,7 @@ import { Google } from './services/google'
 import { devicesRouter } from './routes/devices';
 import { indexRouter}  from './routes/index';
 import { logger } from './logging/request-logger';
+import { ITelemetry } from './logging/telemetry';
 
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
@@ -17,6 +18,7 @@ export interface ServerOptions {
     config: Config;
     db: mongodb.Db;
     google: Google;
+    telemetry: ITelemetry;
 }
 
 export function createServer(options: ServerOptions): http.Server {
@@ -42,7 +44,7 @@ function startServer(options: ServerOptions): http.Server {
 
     // Routers
     app.use('', indexRouter());
-    app.use('/api/devices', devicesRouter(devices, options.google));
+    app.use('/api/devices', devicesRouter(devices, options.google, options.telemetry));
     app.use('/squid', express.static('public/squid'));
 
     const port = process.env.PORT

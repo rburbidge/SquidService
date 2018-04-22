@@ -11,6 +11,7 @@ import * as http from 'http';
 import * as mockgo from 'mockgo';
 import * as mongodb from 'mongodb';
 import * as winston from 'winston';
+import { AppInsights } from '../services/app-insights';
 
 export function setupInt(): TestFixture {
     const testFixture: TestFixture = {
@@ -42,6 +43,8 @@ export function setupInt(): TestFixture {
         function createServerOptions(db: mongodb.Db): ServerOptions {
             const config: Config = {
                 defaultPort: 3001,
+                insightsKey: "insightsKey",
+                telemetryDisabled: true,
                 googleApiKey: "apiKey",
                 googleValidClientIds: ["clientId1", "clientId2"],
                 database: {
@@ -52,7 +55,8 @@ export function setupInt(): TestFixture {
             return {
                 db: db,
                 config: config,
-                google: new Google(config.googleApiKey, config.googleValidClientIds)
+                google: new Google(config.googleApiKey, config.googleValidClientIds),
+                telemetry: new AppInsights(null)
             }
         }
     

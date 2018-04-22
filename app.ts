@@ -4,7 +4,8 @@
 
 import { createServer } from './server';
 import { Config, validateConfig } from './config/config';
-import { Google } from './services/google'
+import { Google } from './services/google';
+import { AppInsights } from './services/app-insights';
 
 const config = require('config');
 import * as mongodb from 'mongodb';
@@ -33,6 +34,14 @@ try {
     throw `${configFileName} validation failed.\n\nERROR: ${error}.\n\nDid you fill in your config AND set the NODE_ENV environment variable?`
 }
 
+// Start app insights first so that it is properly integrated into other imported packages
+const appInsights = require('applicationinsights');
+appInsights.setup(serverConfig.insightsKey);
+appInsights.start();
+if(serverConfig.telemetryDisabled) {
+    appInsights.defaultClient.config.disableAppInsights = true;
+}
+
 const mongoClient: mongodb.MongoClient = mongodb.MongoClient;
 mongoClient.connect(serverConfig.database.url)
     .then((db: mongodb.Db) => {
@@ -42,7 +51,8 @@ mongoClient.connect(serverConfig.database.url)
         return createServer({
             config: serverConfig,
             db: db.db(serverConfig.database.name),
-            google: new Google(serverConfig.googleApiKey, serverConfig.googleValidClientIds)
+            google: new Google(serverConfig.googleApiKey, serverConfig.googleValidClientIds),
+            telemetry: new AppInsights(appInsights.defaultClient)
         });
     })
     .catch(error => {
