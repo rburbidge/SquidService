@@ -44,6 +44,7 @@ export function setupInt(): TestFixture {
             const config: Config = {
                 defaultPort: 3001,
                 insightsKey: "insightsKey",
+                telemetryDisabled: true,
                 googleApiKey: "apiKey",
                 googleValidClientIds: ["clientId1", "clientId2"],
                 database: {

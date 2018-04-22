@@ -1,13 +1,15 @@
 export interface Config {
+    /** The key used for Azure App Insights. */
+    insightsKey: string;
+
+    /** True iff Azure App Insights telemetry is disabled. Enabled by default. */
+    telemetryDisabled?: boolean;
 
     /** The server port that will be used if process.env.PORT is not defined. */
     defaultPort: number;
 
     /** The API key used for Google Cloud Messaging service. */
     googleApiKey: string;
-
-    /** The key used for Azure App Insights. */
-    insightsKey: string;
 
     /**
      * A set of valid client Google client IDs. These correspond to the 'aud' field received in a Google ID or access

@@ -38,6 +38,9 @@ try {
 const appInsights = require('applicationinsights');
 appInsights.setup(serverConfig.insightsKey);
 appInsights.start();
+if(serverConfig.telemetryDisabled) {
+    appInsights.defaultClient.config.disableAppInsights = true;
+}
 
 const mongoClient: mongodb.MongoClient = mongodb.MongoClient;
 mongoClient.connect(serverConfig.database.url)
