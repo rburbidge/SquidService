@@ -4,8 +4,8 @@ import { EventType } from "./event-type";
 export interface ITelemetry {
     /**
      * Log an event.
-     * @param name The name of the event. e.g. 'SendLink'
+     * @param eventType The event type.
      * @param properties The custom properties for the event.
      */
-    trackEvent(name: EventType, properties?: { [name: string]: string; });
+    trackEvent(eventType: EventType, properties?: { [name: string]: string; });
 }

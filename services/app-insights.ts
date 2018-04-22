@@ -1,4 +1,5 @@
 import { ITelemetry } from "../logging/telemetry";
+import { EventType } from "../logging/event-type";
 
 /**
  * Azure application insights implementation of telemetry.
@@ -6,9 +7,9 @@ import { ITelemetry } from "../logging/telemetry";
 export class AppInsights implements ITelemetry {
     constructor(private readonly appInsights: any) { }
 
-    trackEvent(name: string, properties?: { [name: string]: any; }) {
+    trackEvent(eventType: EventType, properties?: { [name: string]: any; }) {
         this.appInsights.trackEvent({
-            name: name,
+            name: eventType,
             properties: properties
         });
     }

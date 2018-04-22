@@ -24,7 +24,7 @@ export class DevicesRouter {
      * Creates a new instance.
      * @param devicesDb The devices database.
      * @param google The Google service.
-     * @param telemetry The App Insights instance.
+     * @param telemetry The telemetry client.
      */
     constructor(
         private readonly devicesDb: Devices,
