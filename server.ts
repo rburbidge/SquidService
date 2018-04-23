@@ -9,9 +9,11 @@ import { ITelemetry } from './logging/telemetry';
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import * as http from 'http';
+import * as exphbs  from 'express-handlebars';
 import * as path from 'path';
 import * as mongodb from 'mongodb';
 import * as winston from 'winston';
+import { squidIndexRouter } from './routes/squid';
 
 const validator = require('express-validator');
 
@@ -40,7 +42,7 @@ function startServer(options: ServerOptions): http.Server {
     // Bootstrap server and pipeline
     const app: express.Application = express();
 
-    app.set('views', path.join(__dirname, 'views'));
+    app.engine('handlebars', exphbs({defaultLayout: 'layout'}));
     app.set('view engine', 'hbs');
 
     app.use(bodyParser.json());
@@ -50,7 +52,8 @@ function startServer(options: ServerOptions): http.Server {
     // Routers
     app.use('', indexRouter());
     app.use('/api/devices', devicesRouter(devices, options.google, options.telemetry));
-    app.use('/squid', express.static('public/squid'));
+    app.use('/squid', squidIndexRouter());
+    app.use('/public/squid', express.static('public/squid'));
 
     const port = process.env.PORT
         ? process.env.PORT

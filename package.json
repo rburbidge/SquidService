@@ -9,6 +9,7 @@
     "body-parser": "^1.15.0",
     "config": "^1.26.1",
     "express": "^4.13.4",
+    "express-handlebars": "^3.0.0",
     "express-validator": "^3.2.1",
     "hbs": "^4.0.1",
     "mocha": "^3.0.2",
