@@ -9,6 +9,7 @@ import { ITelemetry } from './logging/telemetry';
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import * as http from 'http';
+import * as path from 'path';
 import * as mongodb from 'mongodb';
 import * as winston from 'winston';
 
@@ -38,6 +39,10 @@ function startServer(options: ServerOptions): http.Server {
 
     // Bootstrap server and pipeline
     const app: express.Application = express();
+
+    app.set('views', path.join(__dirname, 'views'));
+    app.set('view engine', 'hbs');
+
     app.use(bodyParser.json());
     app.use(validator());
     app.use(logger);

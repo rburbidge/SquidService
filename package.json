@@ -10,6 +10,7 @@
     "config": "^1.26.1",
     "express": "^4.13.4",
     "express-validator": "^3.2.1",
+    "hbs": "^4.0.1",
     "mocha": "^3.0.2",
     "mongodb": "^2.2.30",
     "request-validator": "^0.3.3",
