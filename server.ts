@@ -42,8 +42,7 @@ function startServer(options: ServerOptions): http.Server {
     // Bootstrap server and pipeline
     const app: express.Application = express();
 
-    app.engine('handlebars', exphbs({defaultLayout: 'layout'}));
-    app.set('view engine', 'hbs');
+    setupViewEngine(app, options.config);
 
     app.use(bodyParser.json());
     app.use(validator());
@@ -61,4 +60,20 @@ function startServer(options: ServerOptions): http.Server {
     winston.info('Server listening on port ' + port);
 
     return app.listen(port);
+}
+
+/** Setup the view engine to use handlebars. */
+function setupViewEngine(app: express.Application, config: Config): void {
+    const hbs = exphbs(
+        {
+            extname: 'hbs',
+            defaultLayout: 'layout',
+            partialsDir: 'views/partials/'
+        });
+    app.engine('hbs', hbs);
+    app.set('view engine', 'hbs');
+
+    // App Insights key must be in all view models for app-insights.hbs partial
+    // The value is injected into JS, so wrap in two quotes
+    app.locals.insightsKey = '"' + config.insightsKey + '"';
 }
