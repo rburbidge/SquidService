@@ -1,6 +1,7 @@
 // TODO This needs to be rewritten as TypeScript with a module loader/bundler. Postponing for later
 window.onload = () => {
     let params = new URL(window.location.href).searchParams;
+    // TODO Replace this with handlebars
     if(params.get('client') == 'chrome-ext') {
          $(document.body).addClass('chrome-ext');
     }
