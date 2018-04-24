@@ -64,23 +64,73 @@ describe('Devices', () => {
                 })
         });
 
-        it('Should return 400 if gcmToken not passed', () => {
-            let addDeviceBody = createAddDeviceBody();
-            addDeviceBody.gcmToken = null;
-            return testAddDeviceFails(addDeviceBody);
-        });
+        describe('Validation', () => {
+            describe('gcmToken', () => {
+                it('Should return 400 if gcmToken not passed', () => {
+                    let addDeviceBody = createAddDeviceBody();
+                    addDeviceBody.gcmToken = null;
+                    return testAddDeviceFails(addDeviceBody);
+                });
+    
+                it('Should return 400 if gcmToken is longer than 512 characters', () => {
+                    let addDeviceBody = createAddDeviceBody();
+                    addDeviceBody.gcmToken = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+                    return testAddDeviceFails(addDeviceBody);
+                });
+    
+                it('Should return 200 if gcmToken is up to 512 characters', () => {
+                    let addDeviceBody = createAddDeviceBody();
+                    addDeviceBody.gcmToken = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+                    return testAddDevice(addDeviceBody);
+                });
+            });
 
-        it('Should return 400 if deviceType not passed', () => {
-            let addDeviceBody = createAddDeviceBody();
-            addDeviceBody.deviceType = null;
-            return testAddDeviceFails(addDeviceBody);
-        });
+            describe('deviceType', () => {
+                it('Should return 400 if deviceType not passed', () => {
+                    let addDeviceBody = createAddDeviceBody();
+                    addDeviceBody.deviceType = null;
+                    return testAddDeviceFails(addDeviceBody);
+                });
+    
+                it('Should return 400 if deviceType not chrome or android', () => {
+                    let addDeviceBody = createAddDeviceBody();
+                    addDeviceBody.deviceType = DeviceType.android + "1" as any;
+                    return testAddDeviceFails(addDeviceBody);
+                });
+    
+                it('Should return 200 if deviceType is android', () => {
+                    let addDeviceBody = createAddDeviceBody();
+                    addDeviceBody.deviceType = DeviceType.android;
+                    return testAddDevice(addDeviceBody);
+                });
+    
+                it('Should return 200 if deviceType is chrome', () => {
+                    let addDeviceBody = createAddDeviceBody();
+                    addDeviceBody.deviceType = DeviceType.chrome;
+                    return testAddDevice(addDeviceBody);
+                });
+            });
 
-        it('Should return 400 if name not passed', () => {
-            let addDeviceBody = createAddDeviceBody();
-            addDeviceBody.name = null;
-            return testAddDeviceFails(addDeviceBody);
-        });      
+            describe('name', () => {
+                it('Should return 400 if name not passed', () => {
+                    let addDeviceBody = createAddDeviceBody();
+                    addDeviceBody.name = null;
+                    return testAddDeviceFails(addDeviceBody);
+                });
+
+                it('Should return 400 if name is greater than 25 characters', () => {
+                    let addDeviceBody = createAddDeviceBody();
+                    addDeviceBody.name = 'xxxxxxxxxxxxxxxxxxxxxxxxxx';
+                    return testAddDeviceFails(addDeviceBody);
+                });
+
+                it('Should return 200 if name is up to 25 characters', () => {
+                    let addDeviceBody = createAddDeviceBody();
+                    addDeviceBody.name = 'xxxxxxxxxxxxxxxxxxxxxxxxx';
+                    return testAddDevice(addDeviceBody);
+                });
+            });
+        });
 
         it('Should return error when device limit is reached', () => {
             // Device limit is 10
