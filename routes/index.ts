@@ -7,8 +7,7 @@ class IndexRouter {
     constructor() {
         this.router = express.Router();
         this.router.get('', function(req: express.Request, res: express.Response) {
-            res.writeHead(200);
-            res.end('Hello Server');
+            res.render('index', { title: 'Sir Nommington'});
         });
     }
 }

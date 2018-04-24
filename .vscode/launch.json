@@ -22,6 +22,7 @@
             "name": "Mocha Tests",
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "args": [
+                "--recursive",
                 "-u",
                 "tdd",
                 "--timeout",
@@ -40,6 +41,7 @@
             },
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "args": [
+                "--recursive",
                 "-u",
                 "tdd",
                 "--timeout",

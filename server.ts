@@ -9,8 +9,11 @@ import { ITelemetry } from './logging/telemetry';
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import * as http from 'http';
+import * as exphbs  from 'express-handlebars';
+import * as path from 'path';
 import * as mongodb from 'mongodb';
 import * as winston from 'winston';
+import { squidIndexRouter } from './routes/squid';
 
 const validator = require('express-validator');
 
@@ -38,6 +41,9 @@ function startServer(options: ServerOptions): http.Server {
 
     // Bootstrap server and pipeline
     const app: express.Application = express();
+
+    setupViewEngine(app, options.config);
+
     app.use(bodyParser.json());
     app.use(validator());
     app.use(logger);
@@ -45,7 +51,8 @@ function startServer(options: ServerOptions): http.Server {
     // Routers
     app.use('', indexRouter());
     app.use('/api/devices', devicesRouter(devices, options.google, options.telemetry));
-    app.use('/squid', express.static('public/squid'));
+    app.use('/squid', squidIndexRouter());
+    app.use('/public/squid', express.static('public/squid'));
 
     const port = process.env.PORT
         ? process.env.PORT
@@ -53,4 +60,20 @@ function startServer(options: ServerOptions): http.Server {
     winston.info('Server listening on port ' + port);
 
     return app.listen(port);
+}
+
+/** Setup the view engine to use handlebars. */
+function setupViewEngine(app: express.Application, config: Config): void {
+    const hbs = exphbs(
+        {
+            extname: 'hbs',
+            defaultLayout: 'layout',
+            partialsDir: 'views/partials/'
+        });
+    app.engine('hbs', hbs);
+    app.set('view engine', 'hbs');
+
+    // App Insights key must be in all view models for app-insights.hbs partial
+    // The value is injected into JS, so wrap in two quotes
+    app.locals.insightsKey = '"' + config.insightsKey + '"';
 }

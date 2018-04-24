@@ -9,7 +9,9 @@
     "body-parser": "^1.15.0",
     "config": "^1.26.1",
     "express": "^4.13.4",
+    "express-handlebars": "^3.0.0",
     "express-validator": "^3.2.1",
+    "hbs": "^4.0.1",
     "mocha": "^3.0.2",
     "mongodb": "^2.2.30",
     "request-validator": "^0.3.3",
@@ -42,10 +44,10 @@
   },
   "scripts": {
     "start": "node app.js",
-    "test": "mocha -w",
-    "testSingle": "mocha",
-    "testE2E": "mocha -w --grep @e2e",
-    "testE2ESingle": "mocha --grep @e2e",
+    "test": "mocha -w --recursive",
+    "testSingle": "mocha --recursive",
+    "testE2E": "mocha -w  --recursive --grep @e2e",
+    "testE2ESingle": "mocha  --recursive --grep @e2e",
     "testE2ESingleStart": "start-server-and-test start http://localhost:3000 testE2ESingle"
   },
   "repository": {

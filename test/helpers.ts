@@ -34,3 +34,8 @@ export function setupGoogleSendGcmMessageReturns(result: Promise<void>) {
 export function setupTelemetry() {
     sinon.stub(testFixture.serverOptions.telemetry, 'trackEvent');
 }
+
+/** Assert that actual contains expected. */
+export function assertContains(actual: string, expected: string): void {
+    assert(actual.indexOf(expected) >= 0, `Expected value to contain "${expected}"`)
+}
