@@ -9,7 +9,7 @@ import { createServer } from '../server';
 import { ErrorCode } from '../exposed/squid';
 import { ErrorModel } from '../models/error-model';
 import { Google } from '../services/google';
-import { User } from '../data/models/user';
+import { UserDevices } from '../data/models/user-devices';
 
 import * as express from 'express';
 import * as http from 'http';
@@ -22,12 +22,12 @@ import { testFixture } from './setup';
 describe('Authentication', function() {
     describe('Succeeds', () => {
         it('Succeeds with valid ID token', () => {
-            setupGoogleGetIdTokenReturns(Promise.resolve({} as User));
+            setupGoogleGetIdTokenReturns(Promise.resolve({} as UserDevices));
             return testSucceeds('Bearer Google OAuth ID Token=GOOD ID TOKEN');
         });
     
         it('Succeeds with valid access token', () => {
-            setupGoogleGetAccessTokenReturns(Promise.resolve({} as User));
+            setupGoogleGetAccessTokenReturns(Promise.resolve({} as UserDevices));
             return testSucceeds('Bearer Google OAuth Access Token=GOOD ACCESS TOKEN');
         });
 

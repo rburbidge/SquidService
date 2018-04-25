@@ -1,7 +1,7 @@
 import { AddDeviceBody, DeviceModel, DeviceType, ErrorCode } from '../exposed/squid';
 import { assertErrorModelResponse, setupTelemetry } from './helpers';
 import { testFixture } from './setup';
-import { User } from '../data/models/user';
+import { UserDevices } from '../data/models/user-devices';
 import { setupGoogleGetIdTokenReturns, setupGoogleSendGcmMessageReturns } from './helpers';
 
 import * as assert from 'assert';
@@ -11,7 +11,7 @@ import * as sinon from 'sinon';
 
 describe('Devices', () => {
     beforeEach(() => {
-        setupGoogleGetIdTokenReturns(Promise.resolve({} as User));
+        setupGoogleGetIdTokenReturns(Promise.resolve({} as UserDevices));
         setupTelemetry();
     });
 

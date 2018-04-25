@@ -1,7 +1,7 @@
 import { Device } from './device';
 
 /** A user in the database. */
-export interface User {
+export interface UserDevices {
     /**
      * The user ID.
      */

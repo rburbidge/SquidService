@@ -1,7 +1,7 @@
 import { ErrorModel } from '../models/error-model';
 import { AddDeviceBody, ErrorCode } from '../exposed/squid';
 import { Device } from './models/device';
-import { User } from './models/user';
+import { UserDevices } from './models/user-devices';
 import * as mongodb from 'mongodb';
 import * as winston from 'winston';
 let uuid = require('uuid');
@@ -26,19 +26,19 @@ export class Devices {
      * @throws ErrorModel | any if an error occurs.
      */
     public addDevice(userId: string, deviceBody: AddDeviceBody): Promise<AddDeviceResult> {
-        return this.getUser(userId)
-            .then(user => {
-                if(!user || !user.devices) return;
+        return this.getDevices(userId)
+            .then(devices => {
+                if(!devices) return;
 
                 // Return existing device if one with the same GCM token already exists
-                const devicesWithGcmToken = user.devices.filter(device => device.gcmToken == deviceBody.gcmToken);
+                const devicesWithGcmToken = devices.filter(device => device.gcmToken == deviceBody.gcmToken);
                 if(devicesWithGcmToken.length > 0) {
                     winston.debug(`A device with GCM token ${deviceBody.gcmToken} already exists`);
                     return devicesWithGcmToken[0];
                 }
 
                 // Limit the number of devices per user
-                if(user.devices.length >= Devices.maxNumDevicesPerUser) {
+                if(devices.length >= Devices.maxNumDevicesPerUser) {
                     throw new ErrorModel(ErrorCode.BadRequest, `Devices limit reached. Cannot add more than ${Devices.maxNumDevicesPerUser} devices for a single user`);
                 }
             })
@@ -78,7 +78,7 @@ export class Devices {
             }
 
             // New user with new device
-            let user: User = {
+            let user: UserDevices = {
                 userId: userId,
                 devices: [ device ]
             };
@@ -94,11 +94,12 @@ export class Devices {
     }
 
     /**
-     * Gets a user by their ID.
+     * Gets a user's devices.
      * @param userId The user ID.
      */
-    public getUser(userId: string): Promise<User> {
-        return this.collection.findOne({ 'userId': userId }) as Promise<User>;
+    public getDevices(userId: string): Promise<Device[]> {
+        return this.collection.findOne<UserDevices>({ 'userId': userId })
+            .then(userDevices => userDevices && userDevices.devices);
     }
 
     /**
