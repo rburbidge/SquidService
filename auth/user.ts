@@ -6,12 +6,11 @@ export class User {
      * @param id Unique user ID.
      */
     private constructor(
-        public readonly id,
+        public readonly id: string,
         public readonly name: string,
-        public readonly picture,
-        public readonly email?,
-        public readonly gender?:
-        string) { }
+        public readonly picture: string,
+        public readonly email?: string,
+        public readonly gender?: string) { }
 
     /** The prefix used on Google IDs */
     private static GoogleIdPrefix = "google-";
