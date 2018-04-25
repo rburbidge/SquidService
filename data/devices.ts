@@ -12,11 +12,8 @@ let uuid = require('uuid');
 export class Devices {
 
     private static readonly maxNumDevicesPerUser = 10;
-    private collection: mongodb.Collection;
 
-    constructor(collection: mongodb.Collection) {
-        this.collection = collection
-    }
+    constructor(private readonly collection: mongodb.Collection) { }
 
     /**
      * Adds a device for a user. If the user doesn't exist, adds a new user with the device.
