@@ -7,7 +7,7 @@ import * as assert from 'assert';
 import { IIdentity } from '../../auth/iidentity';
 import { User } from '../../data/models/user';
 
-describe('Users', () => {
+describe('data/Users', () => {
     
     let collection: Collection<any>;
     let users: Users;
@@ -24,13 +24,7 @@ describe('Users', () => {
     describe('addUser()', () => {
         it('Adds a user', (done) => {
             let input = createIdentity();
-            let expected: User = {
-                userId: input.id,
-                email: input.email,
-                name: input.name,
-                picture: input.picture,
-                gender: input.gender
-            };
+            let expected = createUser();
     
             users.addUser(input)
                 .then(() => users.getUser(input.id))
@@ -41,7 +35,7 @@ describe('Users', () => {
         });
 
         it('Only sets fields that are truthy', (done) => {
-            // Add a new user with email missing
+            // Add a new user with email missing, check that it is missing
             let input = createIdentity();
             delete input.email;
             let expected = createUser();
@@ -51,6 +45,29 @@ describe('Users', () => {
                 .then(() => users.getUser(input.id))
                 .then(actual => {
                     assert.deepEqual(actual, expected);
+                    done();
+                });
+        });
+
+        it('Inputs fields that were previously null', (done) => {
+            // Add a new user with email missing, then update it with the email
+            let input = createIdentity();
+            delete input.email;
+            let expected = createUser();
+            delete expected.email;
+
+            users.addUser(input)
+                .then(() => users.getUser(input.id))
+                .then(actual => {
+                    assert.deepEqual(actual, expected);
+
+                    input.email = "foo@foo.foo";
+                    expected.email = input.email;
+                    return users.addUser(input);
+                })
+                .then(() => users.getUser(input.id))
+                .then(updatedActual => {
+                    assert.deepEqual(updatedActual, expected);
                     done();
                 });
         });
