@@ -23,13 +23,7 @@ describe('Users', () => {
 
     describe('addUser()', () => {
         it('Adds a user', (done) => {
-            let input: IIdentity = {
-                id: 'id',
-                name: 'name',
-                picture: 'picture',
-                email: 'email',
-                gender: 'gender'
-            };
+            let input = createIdentity();
             let expected: User = {
                 userId: input.id,
                 email: input.email,
@@ -39,11 +33,46 @@ describe('Users', () => {
             };
     
             users.addUser(input)
-            .then(() => users.getUser('id'))
-            .then(actual => {
-                assert.deepEqual(actual, expected);
-                done();
-            });
+                .then(() => users.getUser(input.id))
+                .then(actual => {
+                    assert.deepEqual(actual, expected);
+                    done();
+                });
         });
+
+        it('Only sets fields that are truthy', (done) => {
+            // Add a new user with email missing
+            let input = createIdentity();
+            delete input.email;
+            let expected = createUser();
+            delete expected.email;
+
+            users.addUser(input)
+                .then(() => users.getUser(input.id))
+                .then(actual => {
+                    assert.deepEqual(actual, expected);
+                    done();
+                });
+        });
+
+        function createIdentity(): IIdentity {
+            return {
+                id: 'id',
+                name: 'name',
+                picture: 'picture',
+                email: 'email',
+                gender: 'gender'
+            };
+        }
+        
+        function createUser(): User {
+            return {
+                userId: 'id',
+                name: 'name',
+                picture: 'picture',
+                email: 'email',
+                gender: 'gender'
+            }
+        }
     });
 });

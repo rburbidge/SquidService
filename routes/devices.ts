@@ -88,7 +88,7 @@ export class DevicesRouter {
         })
     private addDevice(req: tex.IBody<AddDeviceBody>, res: express.Response): void {
         const deviceType = req.body.deviceType;
-        this.usersDb.addUser(req.user, deviceType)
+        this.usersDb.addUser(req.user)
             .then(wasAdded => {
                 if(wasAdded) {
                     this.telemetry.trackEvent(EventType.UserCreate, {
