@@ -1,7 +1,11 @@
 import { IGoogleUserInfo, IGoogleIdToken } from '../services/google'
+import { IIdentity } from './iidentity';
 
 /** An identity object that is created during authentication. */
-export class Identity {
+export class Identity implements IIdentity {
+    /** The prefix used on Google IDs */
+    private static GoogleIdPrefix = "google-";
+    
     public readonly id: string;
 
     /**
@@ -16,9 +20,6 @@ export class Identity {
     {
         this.id = Identity.GoogleIdPrefix + id;
     }
-
-    /** The prefix used on Google IDs */
-    private static GoogleIdPrefix = "google-";
 
     /**
      * Creates a new user from a Google user info.
