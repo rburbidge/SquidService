@@ -49,20 +49,14 @@ describe('data/Users', () => {
                 });
         });
 
-        it('Inputs fields that were previously null', (done) => {
+        it('If a new user is set with a null property, it does not unset an old property', (done) => {
             // Add a new user with email missing, then update it with the email
             let input = createIdentity();
-            delete input.email;
             let expected = createUser();
-            delete expected.email;
 
             users.addUser(input)
-                .then(() => users.getUser(input.id))
-                .then(actual => {
-                    assert.deepEqual(actual, expected);
-
-                    input.email = "foo@foo.foo";
-                    expected.email = input.email;
+                .then(() => {
+                    delete input.name;//input.name = null;
                     return users.addUser(input);
                 })
                 .then(() => users.getUser(input.id))

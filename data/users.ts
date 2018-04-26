@@ -8,21 +8,28 @@ export class Users {
     constructor(private readonly collection: mongodb.Collection) { }
 
     public addUser(user: IIdentity): Promise<boolean> {
-        const newUser: User = {
-            userId: user.id,
-            email: user.email,
-            name: user.name,
-            picture: user.picture,
-            gender: user.gender
-        };
+        return this.getUser(user.id)
+            .then(existingUser => {
+                if(existingUser) {
+                    return Promise.resolve(false);
+                }
 
-        // Delete any falsy properties to prevent them from being overwritten in the database
-        for(let key in newUser) {
-            if(!newUser[key]) delete newUser[key];
-        }
+                const newUser: User = {
+                    userId: user.id,
+                    email: user.email,
+                    name: user.name,
+                    picture: user.picture,
+                    gender: user.gender
+                };
+        
+                // Delete any falsy properties to prevent them from being overwritten in the database
+                for(let key in newUser) {
+                    if(!newUser[key]) delete newUser[key];
+                }
 
-        return this.collection.updateOne({ userId: user.id }, newUser, { upsert: true })
-            .then(result => result.modifiedCount > 0 || result.upsertedCount > 0);
+                return this.collection.updateOne({ userId: user.id }, newUser, { upsert: true })
+                    .then(() => true);
+            });
     }
 
     public getUser(id: string) : Promise<User> {
