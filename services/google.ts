@@ -140,15 +140,15 @@ export interface IGoogleIdToken extends IGoogleToken {
      * An identifier for the user, unique among all Google accounts and never reused. A Google account can have multiple emails at different points in time, but the sub value is never changed. Use sub within your application as the unique-identifier key for the user.
      */
     sub: string;
+
+    /** The user email. */
+    email: string;
 }
 
 /**
  * TODO Get URL for dev guide for this API.
  */
 export interface IGoogleUserInfo extends IGoogleIdToken {
-    /** The user email. */
-    email?: string;
-
     /** The user gender. */
     gender?: string;
 }

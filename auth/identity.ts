@@ -34,6 +34,6 @@ export class Identity implements IIdentity {
      * The Google ID is scoped with "google-" prefix.
      */
     public static fromIdToken(token: IGoogleIdToken): Identity {
-        return new Identity(token.sub, token.name, token.picture);
+        return new Identity(token.sub, token.name, token.picture, token.email);
     }
 }
