@@ -1,14 +1,9 @@
-import { Device } from './device';
+import { DeviceType } from "../../exposed/squid";
 
-/** A user in the database. */
 export interface User {
-    /**
-     * The user ID.
-     */
     userId: string;
-
-    /**
-     * The user's devices.
-     */
-    devices: Device[];
+    email: string;
+    name: string;
+    picture: string;
+    gender: string;
 }

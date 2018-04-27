@@ -1,7 +1,7 @@
 import { ErrorCode } from '../exposed/squid';
 import { ErrorModel } from '../models/error-model';
 import { testFixture } from './setup';
-import { User } from '../data/models/user';
+import { UserDevices } from '../data/models/user-devices';
 
 import * as assert from 'assert';
 import * as http from 'express';
@@ -16,12 +16,12 @@ export function assertErrorModelResponse(response: request.Response, expectedMes
     assert.equal(errorModel.message, expectedMessage);
 }
 
-export function setupGoogleGetAccessTokenReturns(result: Promise<User>) {
+export function setupGoogleGetAccessTokenReturns(result: Promise<UserDevices>) {
     let getAccessTokenUser = sinon.stub(testFixture.serverOptions.google, 'getAccessTokenUser');
     getAccessTokenUser.returns(result);
 }
 
-export function setupGoogleGetIdTokenReturns(result: Promise<User>) {
+export function setupGoogleGetIdTokenReturns(result: Promise<UserDevices>) {
     let getIdTokenUser = sinon.stub(testFixture.serverOptions.google, 'getIdTokenUser');
     getIdTokenUser.returns(result);
 }

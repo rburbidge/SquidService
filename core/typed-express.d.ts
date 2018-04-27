@@ -1,4 +1,4 @@
-import { User }  from '../auth/user';
+import { Identity }  from '../auth/identity';
 import * as express from 'express';
 
 /**
@@ -6,7 +6,7 @@ import * as express from 'express';
  */
 export interface IAuthed extends express.Request {
     /** The user provided by auth. */
-    user: User;
+    user: Identity;
 }
 
 /**

@@ -5,7 +5,7 @@ import { ErrorModel } from '../models/error-model';
 import { ErrorHelper } from './error-helper';
 import { Google, MessageType } from '../services/google';
 import { googleAuth } from '../auth/google-auth';
-import { User } from '../data/models/user';
+import { UserDevices } from '../data/models/user-devices';
 import { Validate } from '../core/validate';
 import { ITelemetry } from '../logging/telemetry';
 
@@ -14,6 +14,7 @@ import * as express from 'express';
 import * as tex from '../core/typed-express';
 import * as winston from 'winston';
 import { EventType } from '../logging/event-type';
+import { Users } from '../data/users';
 
 /** The devices router. */
 export class DevicesRouter {
@@ -22,11 +23,13 @@ export class DevicesRouter {
 
     /**
      * Creates a new instance.
+     * @param usersDb The users database.
      * @param devicesDb The devices database.
      * @param google The Google service.
      * @param telemetry The telemetry client.
      */
     constructor(
+        private readonly usersDb: Users,
         private readonly devicesDb: Devices,
         private readonly google: Google,
         private readonly telemetry: ITelemetry)
@@ -56,9 +59,9 @@ export class DevicesRouter {
      * Get the devices that a user owns.
      */
     private getDevices(req: tex.IAuthed, res: express.Response): void {
-        this.devicesDb.getUser(req.user.id)
-            .then((user: User) => {
-                let deviceModels: DeviceModel[] = user.devices.map((value: Device) => DevicesRouter.convert(value));
+        this.devicesDb.getDevices(req.user.id)
+            .then((devices: Device[]) => {
+                let deviceModels: DeviceModel[] = devices.map((value: Device) => DevicesRouter.convert(value));
                 res.status(200).send(deviceModels);    
             })
             .catch((error) => {
@@ -79,15 +82,25 @@ export class DevicesRouter {
             // the max GCM token size is 256. Using 512 chars just in case
             req.checkBody('gcmToken', 'Must pass valid gcmToken').notEmpty().len(1, 512);
 
-            req.checkBody('deviceType', 'Must pass valid deviceType').notEmpty()
+            req.checkBody('deviceType', 'Must pass valid deviceType')
+               .notEmpty()
                .isIn([DeviceType.android, DeviceType.chrome]);
         })
     private addDevice(req: tex.IBody<AddDeviceBody>, res: express.Response): void {
-        this.devicesDb.addDevice(req.user.id, req.body)
+        const deviceType = req.body.deviceType;
+        this.usersDb.addUser(req.user)
+            .then(wasAdded => {
+                if(wasAdded) {
+                    this.telemetry.trackEvent(EventType.UserCreate, {
+                        originDeviceType: deviceType
+                    });
+                }
+                return this.devicesDb.addDevice(req.user.id, req.body)
+            })
             .then(addDeviceResult => {
                 this.telemetry.trackEvent(EventType.DeviceCreate,
                     {
-                        deviceType: req.body.deviceType,
+                        deviceType: deviceType,
                         deviceExisted: addDeviceResult.added.toString()
                     }
                 );
@@ -127,9 +140,9 @@ export class DevicesRouter {
      */
     @Validate(DevicesRouter.validateDeviceId)
     private command(req: tex.IBodyAndUrlParams<CommandBody, DeviceUrlParams>, res: express.Response): void {
-        this.devicesDb.getUser(req.user.id)
-            .then(user => {
-                let device: Device = user.devices.filter(d => d.id === req.params.deviceId)[0];
+        this.devicesDb.getDevices(req.user.id)
+            .then(devices => {
+                let device: Device = devices.filter(d => d.id === req.params.deviceId)[0];
                 if(!device) {
                     ErrorHelper.send(res, ErrorModel.fromErrorCode(ErrorCode.DeviceNotFound));
                     return;
@@ -180,11 +193,12 @@ interface DeviceUrlParams {
 
 /**
  * Creates the devices express router.
+ * @param usersDb The users database.
  * @param devicesDb The devices database.
  * @param google Google services.
  * @param telemetry Telemetry client.
  */
-export function devicesRouter(devicesDb: Devices, google: Google, telemetry: ITelemetry): express.Router {
-    const router = new DevicesRouter(devicesDb, google, telemetry);
+export function devicesRouter(usersDb: Users, devicesDb: Devices, google: Google, telemetry: ITelemetry): express.Router {
+    const router = new DevicesRouter(usersDb, devicesDb, google, telemetry);
     return router.router;
 }

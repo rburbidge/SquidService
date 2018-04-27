@@ -1,6 +1,6 @@
 import { ErrorModel } from '../models/error-model'
 import { ErrorCode } from '../exposed/squid';
-import { User } from '../auth/user';
+import { Identity } from '../auth/identity';
 import { TokenType } from '../auth/token-type';
 
 import * as winston from 'winston';
@@ -20,10 +20,10 @@ export class Google {
      * Gets ID token info.
      * @param token The ID token.
      */
-    public getIdTokenUser(token: string): Promise<User> {
+    public getIdTokenUser(token: string): Promise<Identity> {
         return this.getGoogleToken(TokenType.Id, token)
             .then((body: IGoogleIdToken) => {
-                return User.fromIdToken(body);
+                return Identity.fromIdToken(body);
             })
             .catch((error) => {
                 winston.warn('Error validating Google ID token: ' + error);
@@ -35,7 +35,7 @@ export class Google {
      * Gets access token info.
      * @param token The access token.
      */
-    public getAccessTokenUser(token: string): Promise<User> {
+    public getAccessTokenUser(token: string): Promise<Identity> {
         // TODO These calls could be done in parallel with Promise.all()
         return this.getGoogleToken(TokenType.Access, token)
             // For access token we still need to call getUserInfo because it does not contain the user info, such as
@@ -94,6 +94,12 @@ export class Google {
             });
     }
 
+    /**
+     * Validates a Google ID or Access token and returns the information contained within.
+     * See https://developers.google.com/identity/sign-in/web/backend-auth for information on this API.
+     * @param tokenType The type of token.
+     * @param token The token itself.
+     */
     private getTokenInfo(tokenType: string, token: string): Promise<any> {
         return axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?${tokenType}=${token}`)
             .then(response => response.data)
@@ -108,13 +114,13 @@ export class Google {
      * Required because access tokens do not contain the user info, such as the user's unique ID.
      * @param accessToken The access token.
      */
-    private static getUserInfo(accessToken: string): Promise<User> {
+    private static getUserInfo(accessToken: string): Promise<Identity> {
         return axios.get(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`)
             .then(response => {
                 if(response.status != 200) throw new ErrorModel(
                     ErrorCode.Authorization, 'response.statusCode=' + response.statusCode + ', body=' + response.data);
                 
-                return User.fromUserInfo(response.data);
+                return Identity.fromUserInfo(response.data);
             });
     }
 }
@@ -140,15 +146,15 @@ export interface IGoogleIdToken extends IGoogleToken {
      * An identifier for the user, unique among all Google accounts and never reused. A Google account can have multiple emails at different points in time, but the sub value is never changed. Use sub within your application as the unique-identifier key for the user.
      */
     sub: string;
+
+    /** The user email. */
+    email: string;
 }
 
 /**
  * TODO Get URL for dev guide for this API.
  */
 export interface IGoogleUserInfo extends IGoogleIdToken {
-    /** The user email. */
-    email?: string;
-
     /** The user gender. */
     gender?: string;
 }

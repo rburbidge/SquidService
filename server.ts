@@ -14,6 +14,7 @@ import * as path from 'path';
 import * as mongodb from 'mongodb';
 import * as winston from 'winston';
 import { squidIndexRouter } from './routes/squid';
+import { Users } from './data/users';
 
 const validator = require('express-validator');
 
@@ -37,7 +38,9 @@ export function createServer(options: ServerOptions): http.Server {
 function startServer(options: ServerOptions): http.Server {
     // Create dependencies
     const devicesDb: mongodb.Collection = options.db.collection('userDevices');
-    const devices: Devices = new Devices(devicesDb);
+    const devices = new Devices(devicesDb);
+    const usersDb: mongodb.Collection = options.db.collection('users');
+    const users = new Users(usersDb);
 
     // Bootstrap server and pipeline
     const app: express.Application = express();
@@ -50,7 +53,7 @@ function startServer(options: ServerOptions): http.Server {
 
     // Routers
     app.use('', indexRouter());
-    app.use('/api/devices', devicesRouter(devices, options.google, options.telemetry));
+    app.use('/api/devices', devicesRouter(users, devices, options.google, options.telemetry));
     app.use('/squid', squidIndexRouter());
     app.use('/public/squid', express.static('public/squid'));
 

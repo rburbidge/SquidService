@@ -4,7 +4,7 @@ import { Google } from '../services/google';
 import { GoogleAuthHelper } from './google-auth-helper';
 import { AuthToken } from './auth-token';
 import { TokenType } from './token-type';
-import { User } from './user';
+import { Identity } from './identity';
 import * as express from 'express';
 import * as tex from '../core/typed-express'
 import * as winston from 'winston';
@@ -25,7 +25,7 @@ class GoogleAuth {
      * Access tokens do not contain the user ID, but we obtain it by making a call to Google getUserInfo.
      * @returns a user if the request has AuthZ, and throws otherwise.
      */
-    public authenticate(req: express.Request): Promise<User> {
+    public authenticate(req: express.Request): Promise<Identity> {
         return Promise.resolve(null)
             .then(result =>  GoogleAuth.parseAuthHeader(req))
             .then(parsedAuthHeader => {
@@ -74,7 +74,7 @@ export function googleAuth(google: Google): express.RequestHandler {
 
     return (req: tex.IAuthed, res: express.Response, next: express.NextFunction) => {
         googleAuth.authenticate(req)
-            .then((user: User) => {
+            .then((user: Identity) => {
                 req.user = user;
                 winston.debug('User is authZd');
                 next();
