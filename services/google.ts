@@ -94,6 +94,12 @@ export class Google {
             });
     }
 
+    /**
+     * Validates a Google ID or Access token and returns the information contained within.
+     * See https://developers.google.com/identity/sign-in/web/backend-auth for information on this API.
+     * @param tokenType The type of token.
+     * @param token The token itself.
+     */
     private getTokenInfo(tokenType: string, token: string): Promise<any> {
         return axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?${tokenType}=${token}`)
             .then(response => response.data)
