@@ -11,6 +11,10 @@ class SquidIndexRouter {
             this.renderInstructions(res);
         });
 
+        this.router.get('/test', (req: express.Request, res: express.Response) => {
+            res.render('squid/test', { title: 'Squid' });
+        });
+
         /** This is a legacy route that can be removed once the Android and Chrome apps update. */
         this.router.get('/instructions.html', (req: express.Request, res: express.Response) => {
             this.renderInstructions(res);
