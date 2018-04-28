@@ -7,8 +7,14 @@ class SquidIndexRouter {
     constructor() {
         this.router = express.Router();
 
+        /** A how to page. */
         this.router.get('/instructions', (req: express.Request, res: express.Response) => {
             this.renderInstructions(res);
+        });
+
+        /** This page is used when the user sends a test link. */
+        this.router.get('/test', (req: express.Request, res: express.Response) => {
+            res.render('squid/test', { title: 'Squid' });
         });
 
         /** This is a legacy route that can be removed once the Android and Chrome apps update. */

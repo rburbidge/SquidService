@@ -28,4 +28,15 @@ describe('@e2e /squid', () => {
                 });
         });
     });
+
+    describe('GET /squid/test', () => {
+        it('Should return test page', () => {
+            return request(testFixture.server)
+                .get('/squid/test')
+                .expect(200)
+                .expect((res) => {
+                    assertContains(res.text, 'Congratulations');
+                });
+        });
+    });
 });

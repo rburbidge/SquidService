@@ -30,6 +30,19 @@ img {
     }
 }
 
+.test .thumb-up {
+    font-size: 100px;
+    color:orange;
+}
+
+.test .tilted {
+    -webkit-transform: rotate(-15deg);
+    -moz-transform: rotate(-15deg);
+    -o-transform: rotate(-15deg);
+    -ms-transform: rotate(-15deg);
+    transform: rotate(-15deg);
+}
+
 .android {
     width: 49%;
     max-width: 300px;
