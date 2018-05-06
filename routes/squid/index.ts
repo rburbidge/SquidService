@@ -7,6 +7,10 @@ class SquidIndexRouter {
     constructor() {
         this.router = express.Router();
 
+        this.router.get('/about', (req: express.Request, res: express.Response) => {
+            res.render('squid/about', { title: 'About Squid' });
+        });
+
         /** A how to page. */
         this.router.get('/instructions', (req: express.Request, res: express.Response) => {
             this.renderInstructions(res);

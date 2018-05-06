@@ -5,22 +5,21 @@ import * as assert from 'assert';
 import { assertContains } from '../helpers';
 
 describe('@e2e /squid', () => {
-    describe('GET /squid/instructions', () => {
-        it('Should return instructions page', () => {
+    describe('GET /squid/about', () => {
+        it('Should return about page', () => {
             return request(testFixture.server)
-                .get('/squid/instructions')
+                .get('/squid/about')
                 .expect(200)
                 .expect((res) => {
-                    assertContains(res.text, 'From Chrome');
-                    assertContains(res.text, 'From Android');
+                    assertContains(res.text, 'Thank you for using Squid!');
                 });
         });
     });
 
-    describe('GET /squid/instructions.html', () => {
+    describe('GET /squid/instructions', () => {
         it('Should return instructions page', () => {
             return request(testFixture.server)
-                .get('/squid/instructions.html')
+                .get('/squid/instructions')
                 .expect(200)
                 .expect((res) => {
                     assertContains(res.text, 'From Chrome');
