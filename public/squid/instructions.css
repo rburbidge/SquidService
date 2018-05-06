@@ -61,3 +61,11 @@ img {
 .img-container {
     text-align: center;
 }
+
+a {
+    color: orange;
+}
+
+a:hover {
+    color: orange;
+}
